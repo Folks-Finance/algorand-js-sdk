@@ -1,4 +1,28 @@
-dist
-node_modules
+# dependencies
+/node_modules
+
+# build
+/dist
+/docs
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# typescript
+*.tsbuildinfo
+
+# eslint
+.eslintcache
+
+# macos
+.DS_Store
+
+# local env files
+.env
+.env*.local
+
+# intellij
 .idea
-.vscode
