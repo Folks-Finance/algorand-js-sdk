@@ -1,4 +1,5 @@
-import type { Address, Algodv2, SuggestedParams, Transaction } from "algosdk";
+import { randomBytes } from "crypto";
+
 import {
   AtomicTransactionComposer,
   decodeAddress,
@@ -8,8 +9,8 @@ import {
   makeEmptyTransactionSigner,
   modelsv2,
 } from "algosdk";
-import { randomBytes } from "crypto";
-import { mulScale } from "../index";
+
+import { mulScale } from "../math-lib";
 import {
   enc,
   getApplicationBox,
@@ -19,12 +20,15 @@ import {
   signer,
   transferAlgoOrAsset,
 } from "../utils";
+
 import { xAlgoABIContract } from "./abi-contracts";
 import {
   greedyStakeAllocationStrategy as defaultStakeAllocationStrategy,
   greedyUnstakeAllocationStrategy as defaultUnstakeAllocationStrategy,
 } from "./allocation-strategies";
+
 import type { ConsensusConfig, ConsensusState } from "./types";
+import type { Address, Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 /**
  *

@@ -1,4 +1,5 @@
 import { mulScale, ONE_16_DP } from "../math-lib";
+
 import type { ConsensusState } from "./types";
 
 function convertAlgoToXAlgoWhenImmediate(algoAmount: bigint, consensusState: ConsensusState): bigint {

@@ -1,4 +1,3 @@
-import type { Account, Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 import {
   AtomicTransactionComposer,
   generateAccount,
@@ -7,6 +6,7 @@ import {
   makeApplicationCloseOutTxn,
   OnApplicationComplete,
 } from "algosdk";
+
 import { compoundEveryHour, compoundEverySecond, mulScale, ONE_10_DP, ONE_16_DP, UINT64 } from "../math-lib";
 import {
   addEscrowNoteTransaction,
@@ -20,11 +20,14 @@ import {
   signer,
   transferAlgoOrAsset,
 } from "../utils";
+
 import { depositsABIContract, poolABIContract } from "./abi-contracts";
 import { calcBorrowInterestIndex, calcDepositInterestIndex, calcWithdrawReturn } from "./formulae";
 import { getOraclePrices } from "./oracle";
-import type { UserDepositFullInfo, Oracle, Pool, PoolInfo, PoolManagerInfo, UserDepositInfo } from "./types";
 import { getEscrows } from "./utils";
+
+import type { UserDepositFullInfo, Oracle, Pool, PoolInfo, PoolManagerInfo, UserDepositInfo } from "./types";
+import type { Account, Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 
 /**
  *

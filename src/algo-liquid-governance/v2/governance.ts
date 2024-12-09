@@ -1,4 +1,3 @@
-import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 import {
   AtomicTransactionComposer,
   decodeAddress,
@@ -9,7 +8,7 @@ import {
   makeApplicationCloseOutTxn,
   OnApplicationComplete,
 } from "algosdk";
-import type { Dispenser, Distributor } from "../common";
+
 import {
   addEscrowNoteTransaction,
   enc,
@@ -20,8 +19,12 @@ import {
   signer,
   transferAlgoOrAsset,
 } from "../../utils";
+
 import { abiDistributor } from "./constants/abi-contracts";
+
 import type { DistributorInfo, EscrowGovernanceStatus, UserCommitmentInfo } from "./types";
+import type { Dispenser, Distributor } from "../common";
+import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 
 function getDistributorLogicSig(userAddr: string): LogicSigAccount {
   const prefix = Uint8Array.from([

@@ -1,6 +1,7 @@
-import type { Indexer } from "algosdk";
-import type { Dispenser, DispenserInfo } from "./types";
 import { getParsedValueFromState, parseUint64s } from "../../utils";
+
+import type { Dispenser, DispenserInfo } from "./types";
+import type { Indexer } from "algosdk";
 
 /**
  *

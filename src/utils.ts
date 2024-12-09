@@ -1,4 +1,3 @@
-import type { Indexer, SuggestedParams, Transaction } from "algosdk";
 import {
   Algodv2,
   decodeAddress,
@@ -6,6 +5,8 @@ import {
   makeAssetTransferTxnWithSuggestedParamsFromObject,
   makePaymentTxnWithSuggestedParamsFromObject,
 } from "algosdk";
+
+import type { Indexer, SuggestedParams, Transaction } from "algosdk";
 import type { Box, TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
 
 const enc = new TextEncoder();

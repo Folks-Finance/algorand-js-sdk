@@ -1,4 +1,3 @@
-import type { Indexer, SuggestedParams, Transaction } from "algosdk";
 import {
   assignGroupID,
   AtomicTransactionComposer,
@@ -6,10 +5,14 @@ import {
   getMethodByName,
   makeApplicationOptInTxn,
 } from "algosdk";
-import type { Dispenser, Distributor } from "../common";
+
 import { getParsedValueFromState, signer, transferAlgoOrAsset } from "../../utils";
+
 import { abiDistributor } from "./constants/abi-contracts";
+
 import type { DistributorInfo, UserCommitmentInfo } from "./types";
+import type { Dispenser, Distributor } from "../common";
+import type { Indexer, SuggestedParams, Transaction } from "algosdk";
 
 /**
  *

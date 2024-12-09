@@ -1,5 +1,5 @@
-import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 import { AtomicTransactionComposer, decodeAddress, decodeUint64, encodeAddress, getMethodByName } from "algosdk";
+
 import { minimum } from "../math-lib";
 import {
   fromIntToBytes8Hex,
@@ -8,10 +8,13 @@ import {
   getParsedValueFromState,
   signer,
 } from "../utils";
+
 import { lpTokenOracleABIContract, oracleAdapterABIContract } from "./abi-contracts";
 import { calcLPPrice } from "./formulae";
-import type { LPToken, Oracle, OraclePrice, OraclePrices, PactLPToken, TinymanLPToken } from "./types";
 import { LPTokenProvider } from "./types";
+
+import type { LPToken, Oracle, OraclePrice, OraclePrices, PactLPToken, TinymanLPToken } from "./types";
+import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
 
 function parseOracleValue(base64Value: string) {

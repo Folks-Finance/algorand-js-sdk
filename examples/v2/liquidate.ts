@@ -1,9 +1,5 @@
 import { assignGroupID, waitForConfirmation } from "algosdk";
-import type {
-  LPToken,
-  LPTokenPool,
-  Pool,
-  UserLoanInfo} from "../../src";
+
 import {
   getOraclePrices,
   prefixWithOpUp,
@@ -19,6 +15,12 @@ import {
   TestnetReserveAddress
 } from "../../src";
 import { algodClient, indexerClient, sender } from "../config";
+
+import type {
+  LPToken,
+  LPTokenPool,
+  Pool,
+  UserLoanInfo} from "../../src";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

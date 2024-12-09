@@ -1,5 +1,6 @@
-import type { OpUp, Oracle, Pool, ReserveAddress } from "../types";
 import { LoanType } from "../types";
+
+import type { OpUp, Oracle, Pool, ReserveAddress } from "../types";
 
 const TestnetPoolManagerAppId = 147157634;
 

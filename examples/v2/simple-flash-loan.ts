@@ -1,7 +1,9 @@
-import type { Transaction } from "algosdk";
 import { assignGroupID } from "algosdk";
+
 import { TestnetPools, TestnetReserveAddress, wrapWithFlashLoan } from "../../src";
 import { algodClient, sender } from "../config";
+
+import type { Transaction } from "algosdk";
 
 async function main() {
   const reserveAddress = TestnetReserveAddress;

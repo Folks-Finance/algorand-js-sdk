@@ -1,4 +1,3 @@
-import type { Account, Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 import {
   AtomicTransactionComposer,
   generateAccount,
@@ -7,6 +6,7 @@ import {
   makeApplicationCloseOutTxn,
   OnApplicationComplete,
 } from "algosdk";
+
 import { maximum } from "../math-lib";
 import {
   addEscrowNoteTransaction,
@@ -19,9 +19,12 @@ import {
   signer,
   unixTime,
 } from "../utils";
+
 import { depositStakingABIContract } from "./abi-contracts";
-import type { DepositStakingInfo, Pool, UserDepositStakingLocalState } from "./types";
 import { depositStakingLocalState, depositStakingProgramsInfo, getEscrows, userDepositStakingInfo } from "./utils";
+
+import type { DepositStakingInfo, Pool, UserDepositStakingLocalState } from "./types";
+import type { Account, Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 
 /**
  *

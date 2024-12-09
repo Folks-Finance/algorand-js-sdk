@@ -1,7 +1,7 @@
 import { ABIContract } from "algosdk";
 
-import depositsABI from "./deposits.json";
 import depositStakingABI from "./deposit-staking.json";
+import depositsABI from "./deposits.json";
 import loanABI from "./loan.json";
 import lpTokenOracleABI from "./lp-token-oracle.json";
 import oracleAdapterABI from "./oracle-adapter.json";

@@ -1,5 +1,5 @@
-import type { Transaction } from "algosdk";
 import { assignGroupID } from "algosdk";
+
 import {
   calcFlashLoanRepayment,
   prepareFlashLoanBegin,
@@ -8,6 +8,8 @@ import {
   TestnetReserveAddress,
 } from "../../src";
 import { algodClient, sender } from "../config";
+
+import type { Transaction } from "algosdk";
 
 async function main() {
   const reserveAddress = TestnetReserveAddress;
