@@ -1,23 +1,25 @@
-import { SuggestedParams, waitForConfirmation} from "algosdk";
+import type { SuggestedParams} from "algosdk";
+import { waitForConfirmation } from "algosdk";
+import type {
+  LoanInfo,
+  Oracle,
+  ReserveAddress,
+  TokenPair} from "../../src/lend/v1";
 import {
   getConversionRate,
   getLoansInfo,
   getOraclePrices,
   getPoolInfo,
   getTokenPairInfo,
-  LoanInfo,
-  Oracle,
   prepareLiquidateTransactions,
-  ReserveAddress,
   TestnetOracle,
   TestnetReserveAddress,
-  TestnetTokenPairs,
-  TokenPair
+  TestnetTokenPairs
 } from "../../src/lend/v1";
 import { algodClient, indexerClient, sender } from "../config";
 
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function liquidateLoans(
@@ -44,7 +46,7 @@ async function liquidateLoans(
       );
 
       // sign transactions
-      const signedTxns = txns.map(txn => txn.signTxn(sender.sk));
+      const signedTxns = txns.map((txn) => txn.signTxn(sender.sk));
 
       // submit transactions
       try {
@@ -52,6 +54,7 @@ async function liquidateLoans(
         await waitForConfirmation(algodClient, txId, 1000);
         console.log("Successfully liquidated: " + escrowAddress);
       } catch (e) {
+        console.error(e);
         console.log("Failed to liquidate: " + escrowAddress);
       }
     }
@@ -77,7 +80,14 @@ async function main() {
   const params = await algodClient.getTransactionParams().do();
 
   // loop through escrows
-  let loansInfo = await getLoansInfo(indexerClient, tokenPair, tokenPairInfo, collateralPoolInfo, borrowPoolInfo, conversionRate);
+  let loansInfo = await getLoansInfo(
+    indexerClient,
+    tokenPair,
+    tokenPairInfo,
+    collateralPoolInfo,
+    borrowPoolInfo,
+    conversionRate,
+  );
   let loans = loansInfo.loans;
   let nextToken = loansInfo.nextToken;
 
@@ -89,7 +99,15 @@ async function main() {
     await sleep(100);
 
     // next loop of escrows
-    loansInfo = await getLoansInfo(indexerClient, tokenPair, tokenPairInfo, collateralPoolInfo, borrowPoolInfo, conversionRate, nextToken);
+    loansInfo = await getLoansInfo(
+      indexerClient,
+      tokenPair,
+      tokenPairInfo,
+      collateralPoolInfo,
+      borrowPoolInfo,
+      conversionRate,
+      nextToken,
+    );
     loans = loansInfo.loans;
     nextToken = loansInfo.nextToken;
 

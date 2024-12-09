@@ -1,7 +1,8 @@
-import { encodeAddress, Indexer } from "algosdk";
+import type { Indexer } from "algosdk";
+import { encodeAddress } from "algosdk";
 import { fromIntToBytes8Hex, getParsedValueFromState } from "../../utils";
 import { calcConversionRate, calcLPPrice, minimum } from "./math";
-import { ConversionRate, LPToken, Oracle, OraclePrice, OraclePrices } from "./types";
+import type { ConversionRate, LPToken, Oracle, OraclePrice, OraclePrices } from "./types";
 
 function parseOracleValue(base64Value: string) {
   const value = Buffer.from(base64Value, "base64").toString("hex");
@@ -42,6 +43,7 @@ async function getTinymanLPPrice(
   const res = await indexerClient.lookupAccountByID(poolAddress).do();
   const { account } = res;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const state = account["apps-local-state"]?.find((app: any) => app.id === validatorAppId)?.["key-value"];
   if (state === undefined)
     throw new Error(`Unable to find Tinyman Pool: ${poolAddress} for validator app ${validatorAppId}.`);

@@ -1,9 +1,11 @@
 import { assignGroupID, waitForConfirmation } from "algosdk";
-import {
-  getOraclePrices,
+import type {
   LPToken,
   LPTokenPool,
   Pool,
+  UserLoanInfo} from "../../src";
+import {
+  getOraclePrices,
   prefixWithOpUp,
   prepareLiquidateLoan,
   retrieveLiquidatableLoans,
@@ -14,13 +16,12 @@ import {
   TestnetOracle,
   TestnetPoolManagerAppId,
   TestnetPools,
-  TestnetReserveAddress,
-  UserLoanInfo,
+  TestnetReserveAddress
 } from "../../src";
 import { algodClient, indexerClient, sender } from "../config";
 
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 const isLPTokenPool = (pool: Pool): pool is LPTokenPool => {
@@ -37,14 +38,18 @@ export const getUserLoanAssets = (pools: Record<string, Pool>, userLoan: UserLoa
   const baseAssetIds: number[] = [];
   const loanPoolAppIds = new Set<number>(); // use set to remove duplicates (assets which are both collateral and borrow)
 
-  userLoan.collaterals.forEach(({ poolAppId }) => loanPoolAppIds.add(poolAppId));
-  userLoan.borrows.forEach(({ poolAppId }) => loanPoolAppIds.add(poolAppId));
+  for (const { poolAppId } of userLoan.collaterals) loanPoolAppIds.add(poolAppId);
+  for (const { poolAppId } of userLoan.borrows) loanPoolAppIds.add(poolAppId);
 
   // add to lp assets and base assets
-  loanPoolAppIds.forEach((poolAppId) => {
+  for (const poolAppId of loanPoolAppIds) {
     const asset = getAssetFromAppId(pools, poolAppId);
-    Number.isNaN(asset) ? lpAssets.push(asset as LPToken) : baseAssetIds.push(asset as number);
-  });
+    if (Number.isNaN(asset)) {
+      lpAssets.push(asset as LPToken);
+    } else {
+      baseAssetIds.push(asset as number);
+    }
+  }
 
   return { lpAssets, baseAssetIds };
 };
@@ -72,7 +77,7 @@ async function main() {
     await sleep(100);
 
     // find liquidatable loans
-    const liquidatableLoans: { loans: UserLoanInfo[], nextToken?: string } = await retrieveLiquidatableLoans(
+    const liquidatableLoans: { loans: UserLoanInfo[]; nextToken?: string } = await retrieveLiquidatableLoans(
       indexerClient,
       loanAppId,
       poolManagerInfo,
@@ -85,7 +90,9 @@ async function main() {
     // liquidate
     for (const loan of liquidatableLoans.loans) {
       // decide on which collateral to seize
-      const [, collateralPool] = Object.entries(pools).find(([_, pool]) => pool.appId === loan.collaterals[0].poolAppId)!;
+      const [, collateralPool] = Object.entries(pools).find(
+        ([_, pool]) => pool.appId === loan.collaterals[0].poolAppId,
+      )!;
 
       // decide on which borrow to repay
       const [, borrowPool] = Object.entries(pools).find(([_, pool]) => pool.appId === loan.borrows[0].poolAppId)!;
@@ -124,17 +131,17 @@ async function main() {
 
       // group, sign and submit
       assignGroupID(liquidateTxns);
-      const signedTxns = liquidateTxns.map(txn => txn.signTxn(sender.sk));
+      const signedTxns = liquidateTxns.map((txn) => txn.signTxn(sender.sk));
       try {
         const { txId } = await algodClient.sendRawTransaction(signedTxns).do();
         await waitForConfirmation(algodClient, txId, 1000);
         console.log("Successfully liquidated: " + loan.escrowAddress);
       } catch (e) {
+        console.error(e);
         console.log("Failed to liquidate: " + loan.escrowAddress);
       }
     }
   } while (nextToken !== undefined);
-
 }
 
 main().catch(console.error);

@@ -1,17 +1,13 @@
+import type { Account, Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 import {
-  Account,
-  Algodv2,
   AtomicTransactionComposer,
   generateAccount,
   getApplicationAddress,
   getMethodByName,
-  Indexer,
   makeApplicationCloseOutTxn,
   OnApplicationComplete,
-  SuggestedParams,
-  Transaction,
 } from "algosdk";
-import { divScale, minimum, mulScale, ONE_10_DP, ONE_4_DP } from "../../mathLib";
+import { divScale, minimum, mulScale, ONE_10_DP, ONE_4_DP } from "../../math-lib";
 import {
   addEscrowNoteTransaction,
   fromIntToByteHex,
@@ -22,11 +18,11 @@ import {
   signer,
   transferAlgoOrAsset,
 } from "../../utils";
-import { loanABIContract, poolABIContract } from "./abiContracts";
+import { loanABIContract, poolABIContract } from "./abi-contracts";
 import { retrievePoolManagerInfo } from "./deposit";
 import { calcBorrowUtilisationRatio, calcDepositReturn, calcFlashLoanRepayment } from "./formulae";
 import { getOraclePrices, prepareRefreshPricesInOracleAdapter } from "./oracle";
-import {
+import type {
   LoanInfo,
   LoanLocalState,
   LPToken,
@@ -252,6 +248,7 @@ async function retrieveLiquidatableLoans(
   // convert to user loan info and add if liquidatable
   for (const acc of res["accounts"]) {
     const escrowAddr = acc["address"];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const state = acc["apps-local-state"]?.find(({ id }: any) => id === loanAppId)?.["key-value"];
     const localState = loanLocalState(state, loanAppId, escrowAddr);
     const loan = userLoanInfo(localState, poolManagerInfo, loanInfo, oraclePrices);

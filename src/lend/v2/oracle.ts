@@ -1,15 +1,6 @@
-import {
-  Algodv2,
-  AtomicTransactionComposer,
-  decodeAddress,
-  decodeUint64,
-  encodeAddress,
-  getMethodByName,
-  Indexer,
-  SuggestedParams,
-  Transaction,
-} from "algosdk";
-import { minimum } from "../../mathLib";
+import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
+import { AtomicTransactionComposer, decodeAddress, decodeUint64, encodeAddress, getMethodByName } from "algosdk";
+import { minimum } from "../../math-lib";
 import {
   fromIntToBytes8Hex,
   getAccountApplicationLocalState,
@@ -17,10 +8,11 @@ import {
   getParsedValueFromState,
   signer,
 } from "../../utils";
-import { lpTokenOracleABIContract, oracleAdapterABIContract } from "./abiContracts";
+import { lpTokenOracleABIContract, oracleAdapterABIContract } from "./abi-contracts";
 import { calcLPPrice } from "./formulae";
-import { LPToken, LPTokenProvider, Oracle, OraclePrice, OraclePrices, PactLPToken, TinymanLPToken } from "./types";
-import { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import type { LPToken, Oracle, OraclePrice, OraclePrices, PactLPToken, TinymanLPToken } from "./types";
+import { LPTokenProvider } from "./types";
+import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
 
 function parseOracleValue(base64Value: string) {
   const value = Buffer.from(base64Value, "base64").toString("hex");
@@ -224,7 +216,7 @@ function prepareRefreshPricesInOracleAdapter(
     foreignAccounts.push(tinymanLPUpdates.map(({ lpPoolAddress }) => lpPoolAddress));
     const apps: number[] = [];
     if (tinymanLPUpdates.length > 0) apps.push(lpTokenOracle!.tinymanValidatorAppId);
-    pactLPUpdates.forEach(({ lpPoolAppId }) => apps.push(lpPoolAppId));
+    for (const { lpPoolAppId } of pactLPUpdates) apps.push(lpPoolAppId);
     foreignApps.push(apps);
 
     // update lp

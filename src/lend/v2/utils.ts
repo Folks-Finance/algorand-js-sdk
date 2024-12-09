@@ -1,6 +1,15 @@
-import { encodeAddress, getApplicationAddress, Indexer } from "algosdk";
-import { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
-import { compoundEverySecond, maximum, mulScale, ONE_10_DP, ONE_16_DP, ONE_4_DP, SECONDS_IN_YEAR } from "../../mathLib";
+import type { Indexer } from "algosdk";
+import { encodeAddress, getApplicationAddress } from "algosdk";
+import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import {
+  compoundEverySecond,
+  maximum,
+  mulScale,
+  ONE_10_DP,
+  ONE_16_DP,
+  ONE_4_DP,
+  SECONDS_IN_YEAR,
+} from "../../math-lib";
 import { enc, fromIntToByteHex, getParsedValueFromState, parseUint64s, unixTime } from "../../utils";
 import {
   calcBorrowAssetLoanValue,
@@ -12,7 +21,7 @@ import {
   calcLTVRatio,
   calcWithdrawReturn,
 } from "./formulae";
-import {
+import type {
   DepositStakingInfo,
   DepositStakingProgramInfo,
   LoanInfo,
@@ -143,68 +152,72 @@ export function depositStakingProgramsInfo(
   const { pools: poolManagerPools } = poolManagerInfo;
   const { prices } = oraclePrices;
 
-  depositStakingInfo.stakingPrograms
-    .filter(({ poolAppId }) => poolAppId !== 0)
-    .forEach(({ poolAppId, totalStaked, minTotalStaked, rewards, stakeIndex }) => {
-      const pool = Object.entries(pools)
-        .map(([, pool]) => pool)
-        .find((pool) => pool.appId === poolAppId);
-      const poolInfo = poolManagerPools[poolAppId];
-      if (pool === undefined || poolInfo === undefined) throw Error("Could not find pool " + poolAppId);
-      const { assetId, fAssetId } = pool;
-      const { depositInterestIndex, depositInterestRate, depositInterestYield } = poolInfo;
+  for (const {
+    poolAppId,
+    totalStaked,
+    minTotalStaked,
+    rewards,
+    stakeIndex,
+  } of depositStakingInfo.stakingPrograms.filter(({ poolAppId }) => poolAppId !== 0)) {
+    const pool = Object.entries(pools)
+      .map(([, pool]) => pool)
+      .find((pool) => pool.appId === poolAppId);
+    const poolInfo = poolManagerPools[poolAppId];
+    if (pool === undefined || poolInfo === undefined) throw Error("Could not find pool " + poolAppId);
+    const { assetId, fAssetId } = pool;
+    const { depositInterestIndex, depositInterestRate, depositInterestYield } = poolInfo;
 
-      const oraclePrice = prices[assetId];
-      if (oraclePrice === undefined) throw Error("Could not find asset price " + assetId);
-      const { price: assetPrice } = oraclePrice;
+    const oraclePrice = prices[assetId];
+    if (oraclePrice === undefined) throw Error("Could not find asset price " + assetId);
+    const { price: assetPrice } = oraclePrice;
 
-      const fAssetTotalStakedAmount = maximum(totalStaked, minTotalStaked);
-      const assetTotalStakedAmount = calcWithdrawReturn(fAssetTotalStakedAmount, depositInterestIndex);
-      const totalStakedAmountValue = mulScale(assetTotalStakedAmount, assetPrice, ONE_10_DP); // 4 d.p.
+    const fAssetTotalStakedAmount = maximum(totalStaked, minTotalStaked);
+    const assetTotalStakedAmount = calcWithdrawReturn(fAssetTotalStakedAmount, depositInterestIndex);
+    const totalStakedAmountValue = mulScale(assetTotalStakedAmount, assetPrice, ONE_10_DP); // 4 d.p.
 
-      const userRewards: {
-        rewardAssetId: number;
-        endTimestamp: bigint;
-        rewardRate: bigint;
-        rewardPerToken: bigint;
-        rewardAssetPrice: bigint;
-        rewardInterestRate: bigint;
-      }[] = [];
-      rewards.forEach(({ rewardAssetId, endTimestamp, rewardRate, rewardPerToken }) => {
-        const oraclePrice = prices[rewardAssetId];
-        if (oraclePrice === undefined) throw Error("Could not find asset price " + rewardAssetId);
-        const { price: rewardAssetPrice } = oraclePrice;
+    const userRewards: {
+      rewardAssetId: number;
+      endTimestamp: bigint;
+      rewardRate: bigint;
+      rewardPerToken: bigint;
+      rewardAssetPrice: bigint;
+      rewardInterestRate: bigint;
+    }[] = [];
+    for (const { rewardAssetId, endTimestamp, rewardRate, rewardPerToken } of rewards) {
+      const oraclePrice = prices[rewardAssetId];
+      if (oraclePrice === undefined) throw Error("Could not find asset price " + rewardAssetId);
+      const { price: rewardAssetPrice } = oraclePrice;
 
-        const stakedAmountValue = assetTotalStakedAmount * assetPrice;
-        const rewardInterestRate =
-          unixTime() < endTimestamp && stakedAmountValue !== BigInt(0)
-            ? (rewardRate * BigInt(1e6) * rewardAssetPrice * SECONDS_IN_YEAR) / stakedAmountValue
-            : BigInt(0);
+      const stakedAmountValue = assetTotalStakedAmount * assetPrice;
+      const rewardInterestRate =
+        unixTime() < endTimestamp && stakedAmountValue !== BigInt(0)
+          ? (rewardRate * BigInt(1e6) * rewardAssetPrice * SECONDS_IN_YEAR) / stakedAmountValue
+          : BigInt(0);
 
-        userRewards.push({
-          rewardAssetId,
-          endTimestamp,
-          rewardAssetPrice,
-          rewardInterestRate,
-          rewardRate,
-          rewardPerToken,
-        });
+      userRewards.push({
+        rewardAssetId,
+        endTimestamp,
+        rewardAssetPrice,
+        rewardInterestRate,
+        rewardRate,
+        rewardPerToken,
       });
+    }
 
-      stakingPrograms.push({
-        poolAppId,
-        stakeIndex,
-        fAssetId,
-        fAssetTotalStakedAmount,
-        assetId,
-        assetPrice,
-        assetTotalStakedAmount,
-        totalStakedAmountValue,
-        depositInterestRate,
-        depositInterestYield,
-        rewards: userRewards,
-      });
+    stakingPrograms.push({
+      poolAppId,
+      stakeIndex,
+      fAssetId,
+      fAssetTotalStakedAmount,
+      assetId,
+      assetPrice,
+      assetTotalStakedAmount,
+      totalStakedAmountValue,
+      depositInterestRate,
+      depositInterestYield,
+      rewards: userRewards,
     });
+  }
 
   return stakingPrograms;
 }
@@ -227,7 +240,7 @@ export function userDepositStakingInfo(
   const stakingPrograms: UserDepositStakingProgramInfo[] = [];
   const { pools: poolManagerPools } = poolManagerInfo;
 
-  depositStakingProgramsInfo.forEach((stakingProgram, stakeIndex) => {
+  for (const [stakeIndex, stakingProgram] of depositStakingProgramsInfo.entries()) {
     const { poolAppId, fAssetId, assetId, assetPrice, depositInterestRate, depositInterestYield, rewards } =
       stakingProgram;
 
@@ -247,26 +260,27 @@ export function userDepositStakingInfo(
       unclaimedReward: bigint;
       unclaimedRewardValue: bigint;
     }[] = [];
-    rewards.forEach(
-      ({ rewardAssetId, endTimestamp, rewardAssetPrice, rewardInterestRate, rewardPerToken }, localRewardIndex) => {
-        const rewardIndex = stakeIndex * 3 + localRewardIndex;
-        const oldRewardPerToken = localState.rewardPerTokens[rewardIndex];
-        const oldUnclaimedReward = localState.unclaimedRewards[rewardIndex];
+    for (const [
+      localRewardIndex,
+      { rewardAssetId, endTimestamp, rewardAssetPrice, rewardInterestRate, rewardPerToken },
+    ] of rewards.entries()) {
+      const rewardIndex = stakeIndex * 3 + localRewardIndex;
+      const oldRewardPerToken = localState.rewardPerTokens[rewardIndex];
+      const oldUnclaimedReward = localState.unclaimedRewards[rewardIndex];
 
-        const unclaimedReward =
-          oldUnclaimedReward + mulScale(fAssetStakedAmount, rewardPerToken - oldRewardPerToken, ONE_10_DP);
-        const unclaimedRewardValue = mulScale(unclaimedReward, rewardAssetPrice, ONE_10_DP); // 4 d.p.
+      const unclaimedReward =
+        oldUnclaimedReward + mulScale(fAssetStakedAmount, rewardPerToken - oldRewardPerToken, ONE_10_DP);
+      const unclaimedRewardValue = mulScale(unclaimedReward, rewardAssetPrice, ONE_10_DP); // 4 d.p.
 
-        userRewards.push({
-          rewardAssetId,
-          endTimestamp,
-          rewardAssetPrice,
-          rewardInterestRate,
-          unclaimedReward,
-          unclaimedRewardValue,
-        });
-      },
-    );
+      userRewards.push({
+        rewardAssetId,
+        endTimestamp,
+        rewardAssetPrice,
+        rewardInterestRate,
+        unclaimedReward,
+        unclaimedRewardValue,
+      });
+    }
 
     stakingPrograms.push({
       poolAppId,
@@ -280,7 +294,7 @@ export function userDepositStakingInfo(
       depositInterestYield,
       rewards: userRewards,
     });
-  });
+  }
 
   return {
     currentRound: localState.currentRound,
@@ -370,9 +384,9 @@ export function userLoanInfo(
   let totalCollateralBalanceValue = BigInt(0);
   let totalEffectiveCollateralBalanceValue = BigInt(0);
 
-  localState.collaterals.forEach(({ poolAppId, fAssetBalance }) => {
+  for (const { poolAppId, fAssetBalance } of localState.collaterals) {
     const isColPresent = poolAppId > 0;
-    if (!isColPresent) return;
+    if (!isColPresent) continue;
 
     const poolInfo = poolManagerPools[poolAppId];
     const poolLoanInfo = loanPools[poolAppId];
@@ -407,7 +421,7 @@ export function userLoanInfo(
       interestRate: depositInterestRate,
       interestYield: depositInterestYield,
     });
-  });
+  }
 
   // borrows
   const borrows: UserLoanInfoBorrow[] = [];
@@ -415,64 +429,62 @@ export function userLoanInfo(
   let totalBorrowBalanceValue = BigInt(0);
   let totalEffectiveBorrowBalanceValue = BigInt(0);
 
-  localState.borrows.forEach(
-    ({
+  for (const {
+    poolAppId,
+    borrowedAmount,
+    borrowBalance: oldBorrowBalance,
+    latestBorrowInterestIndex,
+    stableBorrowInterestRate,
+    latestStableChange,
+  } of localState.borrows) {
+    const isBorPresent = oldBorrowBalance > BigInt(0);
+    if (!isBorPresent) continue;
+
+    const poolInfo = poolManagerPools[poolAppId];
+    const poolLoanInfo = loanPools[poolAppId];
+    if (poolInfo === undefined || poolLoanInfo === undefined) throw Error("Could not find borrow pool " + poolAppId);
+
+    const { assetId, borrowFactor } = poolLoanInfo;
+    const oraclePrice = prices[assetId];
+    if (oraclePrice === undefined) throw Error("Could not find asset price " + assetId);
+
+    const { price: assetPrice } = oraclePrice;
+    const isStable = latestStableChange > BigInt(0);
+    const bii = isStable
+      ? calcBorrowInterestIndex(stableBorrowInterestRate, latestBorrowInterestIndex, latestStableChange)
+      : poolInfo.variableBorrowInterestIndex;
+    const borrowedAmountValue = calcCollateralAssetLoanValue(borrowedAmount, oraclePrice.price, ONE_4_DP); // no rounding
+    const borrowBalance = calcBorrowBalance(oldBorrowBalance, bii, latestBorrowInterestIndex);
+    const borrowBalanceValue = calcBorrowAssetLoanValue(borrowBalance, assetPrice, ONE_4_DP);
+    const effectiveBorrowBalanceValue = calcBorrowAssetLoanValue(borrowBalance, assetPrice, borrowFactor);
+    const interestRate = isStable ? stableBorrowInterestRate : poolInfo.variableBorrowInterestRate;
+    const interestYield = isStable
+      ? compoundEverySecond(stableBorrowInterestRate, ONE_16_DP)
+      : poolInfo.variableBorrowInterestYield;
+
+    totalBorrowedAmountValue += borrowedAmountValue;
+    totalBorrowBalanceValue += borrowBalanceValue;
+    totalEffectiveBorrowBalanceValue += effectiveBorrowBalanceValue;
+    netRate -= borrowBalanceValue * interestRate;
+    netYield -= borrowBalanceValue * interestYield;
+
+    borrows.push({
       poolAppId,
+      assetId,
+      assetPrice,
+      isStable,
+      borrowFactor,
       borrowedAmount,
-      borrowBalance: oldBorrowBalance,
-      latestBorrowInterestIndex,
-      stableBorrowInterestRate,
-      latestStableChange,
-    }) => {
-      const isBorPresent = oldBorrowBalance > BigInt(0);
-      if (!isBorPresent) return;
-
-      const poolInfo = poolManagerPools[poolAppId];
-      const poolLoanInfo = loanPools[poolAppId];
-      if (poolInfo === undefined || poolLoanInfo === undefined) throw Error("Could not find borrow pool " + poolAppId);
-
-      const { assetId, borrowFactor } = poolLoanInfo;
-      const oraclePrice = prices[assetId];
-      if (oraclePrice === undefined) throw Error("Could not find asset price " + assetId);
-
-      const { price: assetPrice } = oraclePrice;
-      const isStable = latestStableChange > BigInt(0);
-      const bii = isStable
-        ? calcBorrowInterestIndex(stableBorrowInterestRate, latestBorrowInterestIndex, latestStableChange)
-        : poolInfo.variableBorrowInterestIndex;
-      const borrowedAmountValue = calcCollateralAssetLoanValue(borrowedAmount, oraclePrice.price, ONE_4_DP); // no rounding
-      const borrowBalance = calcBorrowBalance(oldBorrowBalance, bii, latestBorrowInterestIndex);
-      const borrowBalanceValue = calcBorrowAssetLoanValue(borrowBalance, assetPrice, ONE_4_DP);
-      const effectiveBorrowBalanceValue = calcBorrowAssetLoanValue(borrowBalance, assetPrice, borrowFactor);
-      const interestRate = isStable ? stableBorrowInterestRate : poolInfo.variableBorrowInterestRate;
-      const interestYield = isStable
-        ? compoundEverySecond(stableBorrowInterestRate, ONE_16_DP)
-        : poolInfo.variableBorrowInterestYield;
-
-      totalBorrowedAmountValue += borrowedAmountValue;
-      totalBorrowBalanceValue += borrowBalanceValue;
-      totalEffectiveBorrowBalanceValue += effectiveBorrowBalanceValue;
-      netRate -= borrowBalanceValue * interestRate;
-      netYield -= borrowBalanceValue * interestYield;
-
-      borrows.push({
-        poolAppId,
-        assetId,
-        assetPrice,
-        isStable,
-        borrowFactor,
-        borrowedAmount,
-        borrowedAmountValue,
-        borrowBalance,
-        borrowBalanceValue,
-        effectiveBorrowBalanceValue,
-        accruedInterest: borrowBalance - borrowedAmount,
-        accruedInterestValue: borrowBalanceValue - borrowedAmountValue,
-        interestRate,
-        interestYield,
-      });
-    },
-  );
+      borrowedAmountValue,
+      borrowBalance,
+      borrowBalanceValue,
+      effectiveBorrowBalanceValue,
+      accruedInterest: borrowBalance - borrowedAmount,
+      accruedInterestValue: borrowBalanceValue - borrowedAmountValue,
+      interestRate,
+      interestYield,
+    });
+  }
 
   if (totalCollateralBalanceValue > BigInt(0)) {
     netRate /= totalCollateralBalanceValue;

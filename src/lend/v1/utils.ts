@@ -1,7 +1,8 @@
-import { encodeAddress, Indexer } from "algosdk";
+import type { Indexer } from "algosdk";
+import { encodeAddress } from "algosdk";
 import { getParsedValueFromState } from "../../utils";
 import { calcBorrowBalance, calcHealthFactor, calcThreshold } from "./math";
-import {
+import type {
   ConversionRate,
   LoanInfo,
   Oracle,
@@ -60,6 +61,7 @@ function getOracleAdapterForeignAccounts(oracle: Oracle, tokenPair: TokenPair): 
  * @returns LoanInfo loan info
  */
 function loanInfo(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   escrow: any,
   tokenPair: TokenPair,
   tokenPairInfo: TokenPairInfo,
@@ -76,12 +78,14 @@ function loanInfo(
   const { rate, decimals } = conversionRate;
 
   // escrow balance
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const collateralBalance = escrow["assets"]?.find((asset: any) => asset["asset-id"] === collateralPool.fAssetId)?.[
     "amount"
   ];
   if (collateralBalance === undefined) throw new Error("Unable to get escrow: " + escrowAddr + " collateral balance.");
 
   // escrow local state
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const state = escrow["apps-local-state"]?.find((app: any) => app.id === appId)?.["key-value"];
   if (state === undefined) throw new Error("Unable to find escrow: " + escrowAddr + " for token pair " + appId + ".");
   if (getParsedValueFromState(state, "borrowed") === undefined)
@@ -131,12 +135,14 @@ async function getEscrows(
   tokenPair: TokenPair,
   nextToken?: string,
   round?: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   const { appId, collateralPool } = tokenPair;
   const req = indexerClient
     .searchAccounts()
     .applicationID(appId)
     .assetID(collateralPool.fAssetId)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .currencyGreaterThan("0" as any); // TODO: https://github.com/algorand/indexer/issues/144
   if (nextToken) req.nextToken(nextToken);
   if (round) req.round(round);

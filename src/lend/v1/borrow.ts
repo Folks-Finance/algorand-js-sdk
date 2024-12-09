@@ -1,17 +1,18 @@
-import {
+import type {
   Account,
+  Indexer,
+  SuggestedParams,
+  Transaction} from "algosdk";
+import {
   assignGroupID,
   encodeUint64,
   generateAccount,
   getApplicationAddress,
-  Indexer,
   makeApplicationNoOpTxn,
-  makeApplicationOptInTxn,
-  SuggestedParams,
-  Transaction,
+  makeApplicationOptInTxn
 } from "algosdk";
 import { enc, getParsedValueFromState, transferAlgoOrAsset } from "../../utils";
-import { Oracle, ReserveAddress, TokenPair, TokenPairInfo } from "./types";
+import type { Oracle, ReserveAddress, TokenPair, TokenPairInfo } from "./types";
 import { getOracleAdapterForeignAccounts, getOracleAdapterForeignApps } from "./utils";
 
 /**

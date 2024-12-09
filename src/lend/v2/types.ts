@@ -55,7 +55,7 @@ interface BaseLendingPoolInfo {
   tvlUsd: number;
 }
 
-interface PactLendingPoolInfo extends BaseLendingPoolInfo {}
+type PactLendingPoolInfo = BaseLendingPoolInfo;
 interface TinymanLendingPoolInfo extends BaseLendingPoolInfo {
   farmInterestYield: bigint; // 16 d.p.
 }

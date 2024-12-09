@@ -31,14 +31,14 @@ async function main() {
   const collateralAmount = 2e6;
   const borrowAmount = 1e6;
   txns = prepareBorrowTransactions(tokenPair, oracle, sender.addr, escrow.addr, collateralAmount, borrowAmount, params);
-  signedTxns = txns.map(txn => txn.signTxn(sender.sk));
+  signedTxns = txns.map((txn) => txn.signTxn(sender.sk));
   txId = (await algodClient.sendRawTransaction(signedTxns).do()).txId;
   await waitForConfirmation(algodClient, txId, 1000);
 
   // repay
   const repayAmount = 1.1e6;
   txns = prepareRepayTransactions(tokenPair, sender.addr, escrow.addr, reserveAddress, repayAmount, params);
-  signedTxns = txns.map(txn => txn.signTxn(sender.sk));
+  signedTxns = txns.map((txn) => txn.signTxn(sender.sk));
   txId = (await algodClient.sendRawTransaction(signedTxns).do()).txId;
   await waitForConfirmation(algodClient, txId, 1000);
 }
