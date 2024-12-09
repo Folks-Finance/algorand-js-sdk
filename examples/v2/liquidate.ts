@@ -1,9 +1,11 @@
 import { assignGroupID, waitForConfirmation } from "algosdk";
-import {
-  getOraclePrices,
+import type {
   LPToken,
   LPTokenPool,
   Pool,
+  UserLoanInfo} from "../../src";
+import {
+  getOraclePrices,
   prefixWithOpUp,
   prepareLiquidateLoan,
   retrieveLiquidatableLoans,
@@ -14,8 +16,7 @@ import {
   TestnetOracle,
   TestnetPoolManagerAppId,
   TestnetPools,
-  TestnetReserveAddress,
-  UserLoanInfo,
+  TestnetReserveAddress
 } from "../../src";
 import { algodClient, indexerClient, sender } from "../config";
 
@@ -37,18 +38,18 @@ export const getUserLoanAssets = (pools: Record<string, Pool>, userLoan: UserLoa
   const baseAssetIds: number[] = [];
   const loanPoolAppIds = new Set<number>(); // use set to remove duplicates (assets which are both collateral and borrow)
 
-  userLoan.collaterals.forEach(({ poolAppId }) => loanPoolAppIds.add(poolAppId));
-  userLoan.borrows.forEach(({ poolAppId }) => loanPoolAppIds.add(poolAppId));
+  for (const { poolAppId } of userLoan.collaterals) loanPoolAppIds.add(poolAppId);
+  for (const { poolAppId } of userLoan.borrows) loanPoolAppIds.add(poolAppId);
 
   // add to lp assets and base assets
-  loanPoolAppIds.forEach((poolAppId) => {
+  for (const poolAppId of loanPoolAppIds) {
     const asset = getAssetFromAppId(pools, poolAppId);
     if (Number.isNaN(asset)) {
       lpAssets.push(asset as LPToken);
     } else {
       baseAssetIds.push(asset as number);
     }
-  });
+  }
 
   return { lpAssets, baseAssetIds };
 };

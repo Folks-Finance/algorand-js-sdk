@@ -1,17 +1,13 @@
+import type { Account, Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 import {
-  Account,
-  Algodv2,
   AtomicTransactionComposer,
   generateAccount,
   getApplicationAddress,
   getMethodByName,
-  Indexer,
   makeApplicationCloseOutTxn,
   OnApplicationComplete,
-  SuggestedParams,
-  Transaction,
 } from "algosdk";
-import { compoundEveryHour, compoundEverySecond, mulScale, ONE_10_DP, ONE_16_DP, UINT64 } from "../../mathLib";
+import { compoundEveryHour, compoundEverySecond, mulScale, ONE_10_DP, ONE_16_DP, UINT64 } from "../../math-lib";
 import {
   addEscrowNoteTransaction,
   fromIntToByteHex,
@@ -24,10 +20,10 @@ import {
   signer,
   transferAlgoOrAsset,
 } from "../../utils";
-import { depositsABIContract, poolABIContract } from "./abiContracts";
+import { depositsABIContract, poolABIContract } from "./abi-contracts";
 import { calcBorrowInterestIndex, calcDepositInterestIndex, calcWithdrawReturn } from "./formulae";
 import { getOraclePrices } from "./oracle";
-import { UserDepositFullInfo, Oracle, Pool, PoolInfo, PoolManagerInfo, UserDepositInfo } from "./types";
+import type { UserDepositFullInfo, Oracle, Pool, PoolInfo, PoolManagerInfo, UserDepositInfo } from "./types";
 import { getEscrows } from "./utils";
 
 /**
@@ -172,9 +168,9 @@ async function retrieveUserDepositsInfo(
   for (const escrowAddr of escrows) {
     const { currentRound, holdings: assetHoldings } = await getAccountDetails(indexerClient, escrowAddr);
     const holdings: { fAssetId: number; fAssetBalance: bigint }[] = [];
-    assetHoldings.forEach((balance, assetId) => {
+    for (const [assetId, balance] of assetHoldings.entries()) {
       if (assetId !== 0) holdings.push({ fAssetId: assetId, fAssetBalance: balance });
-    });
+    }
     userDepositsInfo.push({ currentRound, escrowAddress: escrowAddr, holdings });
   }
 
@@ -264,9 +260,9 @@ async function retrieveUserDepositInfo(
 ): Promise<UserDepositInfo> {
   const { currentRound, holdings: assetHoldings } = await getAccountDetails(client, escrowAddr);
   const holdings: { fAssetId: number; fAssetBalance: bigint }[] = [];
-  assetHoldings.forEach((balance, assetId) => {
+  for (const [assetId, balance] of assetHoldings.entries()) {
     if (assetId !== 0) holdings.push({ fAssetId: assetId, fAssetBalance: balance });
-  });
+  }
   return { currentRound, escrowAddress: escrowAddr, holdings };
 }
 

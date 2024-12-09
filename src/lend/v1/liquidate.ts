@@ -1,17 +1,10 @@
-import {
-  assignGroupID,
-  encodeUint64,
-  getApplicationAddress,
-  Indexer,
-  makeApplicationNoOpTxn,
-  SuggestedParams,
-  Transaction,
-} from "algosdk";
+import type { Indexer, SuggestedParams, Transaction } from "algosdk";
+import { assignGroupID, encodeUint64, getApplicationAddress, makeApplicationNoOpTxn } from "algosdk";
 import { enc, transferAlgoOrAsset } from "../../utils";
 import { getTokenPairInfo } from "./borrow";
 import { getPoolInfo } from "./deposit";
 import { getConversionRate, getOraclePrices } from "./oracle";
-import { ConversionRate, LoanInfo, Oracle, PoolInfo, ReserveAddress, TokenPair, TokenPairInfo } from "./types";
+import type { ConversionRate, LoanInfo, Oracle, PoolInfo, ReserveAddress, TokenPair, TokenPairInfo } from "./types";
 import { getEscrows, getOracleAdapterForeignAccounts, getOracleAdapterForeignApps, loanInfo } from "./utils";
 
 /**
@@ -90,8 +83,8 @@ async function getLoansInfo(
 
   // derive loans info
   const loans: LoanInfo[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  res["accounts"].forEach((account: any) => {
+
+  for (const account of res["accounts"]) {
     try {
       const loan = loanInfo(
         account,
@@ -106,7 +99,7 @@ async function getLoansInfo(
     } catch (e) {
       console.error(e);
     }
-  });
+  }
 
   return {
     loans,

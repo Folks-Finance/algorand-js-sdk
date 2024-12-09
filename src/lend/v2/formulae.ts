@@ -10,7 +10,7 @@ import {
   ONE_4_DP,
   SECONDS_IN_YEAR,
   sqrt,
-} from "../../mathLib";
+} from "../../math-lib";
 import { unixTime } from "../../utils";
 
 /**

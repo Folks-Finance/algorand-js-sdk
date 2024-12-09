@@ -1,7 +1,8 @@
-import { encodeAddress, Indexer } from "algosdk";
+import type { Indexer } from "algosdk";
+import { encodeAddress } from "algosdk";
 import { getParsedValueFromState } from "../../utils";
 import { calcBorrowBalance, calcHealthFactor, calcThreshold } from "./math";
-import {
+import type {
   ConversionRate,
   LoanInfo,
   Oracle,

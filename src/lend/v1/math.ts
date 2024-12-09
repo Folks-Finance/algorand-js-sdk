@@ -1,5 +1,5 @@
 import { unixTime } from "../../utils";
-import { ConversionRate } from "./types";
+import type { ConversionRate } from "./types";
 
 const DECIMALS = BigInt(1e14);
 const SECONDS_IN_YEAR = 365 * 24 * 60 * 60;

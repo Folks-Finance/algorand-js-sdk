@@ -1,14 +1,12 @@
+import type { Indexer, SuggestedParams, Transaction } from "algosdk";
 import {
   Algodv2,
   decodeAddress,
   getApplicationAddress,
-  Indexer,
   makeAssetTransferTxnWithSuggestedParamsFromObject,
   makePaymentTxnWithSuggestedParamsFromObject,
-  SuggestedParams,
-  Transaction,
 } from "algosdk";
-import { Box, TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import type { Box, TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
 
 const enc = new TextEncoder();
 
@@ -129,8 +127,10 @@ async function getAccountDetails(
     const assets = account["assets"] || [];
 
     holdings.set(0, BigInt(account["amount"])); // includes min balance
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    assets.forEach(({ "asset-id": assetId, amount }: any) => holdings.set(assetId, BigInt(amount)));
+
+    for (const asset of assets) {
+      holdings.set(asset["asset-id"], BigInt(asset["amount"]));
+    }
 
     return {
       currentRound: res["current-round"],
@@ -208,8 +208,8 @@ function parseBitsAsBooleans(base64Value: string): boolean[] {
   const value = Buffer.from(base64Value, "base64").toString("hex");
   const bits = ("00000000" + Number("0x" + value).toString(2)).slice(-8);
   const bools: boolean[] = [];
-  for (let i = 0; i < bits.length; i++) {
-    bools.push(Boolean(parseInt(bits[i])));
+  for (const bit of bits) {
+    bools.push(Boolean(parseInt(bit)));
   }
   return bools;
 }

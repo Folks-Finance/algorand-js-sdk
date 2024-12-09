@@ -1,18 +1,20 @@
-import { SuggestedParams, waitForConfirmation } from "algosdk";
+import type { SuggestedParams} from "algosdk";
+import { waitForConfirmation } from "algosdk";
+import type {
+  LoanInfo,
+  Oracle,
+  ReserveAddress,
+  TokenPair} from "../../src/lend/v1";
 import {
   getConversionRate,
   getLoansInfo,
   getOraclePrices,
   getPoolInfo,
   getTokenPairInfo,
-  LoanInfo,
-  Oracle,
   prepareLiquidateTransactions,
-  ReserveAddress,
   TestnetOracle,
   TestnetReserveAddress,
-  TestnetTokenPairs,
-  TokenPair,
+  TestnetTokenPairs
 } from "../../src/lend/v1";
 import { algodClient, indexerClient, sender } from "../config";
 

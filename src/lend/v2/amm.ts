@@ -1,12 +1,12 @@
-import { Algodv2, Indexer } from "algosdk";
-import { compoundEveryHour, ONE_16_DP } from "../../mathLib";
+import type { Algodv2, Indexer } from "algosdk";
+import { compoundEveryHour, ONE_16_DP } from "../../math-lib";
 import {
   getAccountApplicationLocalState,
   getApplicationGlobalState,
   getParsedValueFromState,
   parseUint64s,
 } from "../../utils";
-import {
+import type {
   PactLendingPool,
   PactLendingPoolInfo,
   PoolManagerInfo,

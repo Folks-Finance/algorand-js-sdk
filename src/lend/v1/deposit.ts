@@ -1,14 +1,15 @@
+import type {
+  Indexer,
+  SuggestedParams,
+  Transaction} from "algosdk";
 import {
   assignGroupID,
   getApplicationAddress,
-  Indexer,
-  makeApplicationNoOpTxn,
-  SuggestedParams,
-  Transaction,
+  makeApplicationNoOpTxn
 } from "algosdk";
 import { enc, getParsedValueFromState, transferAlgoOrAsset } from "../../utils";
 import { calcInterestIndex, calcUtilizationRatio } from "./math";
-import { Pool, PoolInfo } from "./types";
+import type { Pool, PoolInfo } from "./types";
 
 /**
  *

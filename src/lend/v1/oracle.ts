@@ -1,7 +1,8 @@
-import { encodeAddress, Indexer } from "algosdk";
+import type { Indexer } from "algosdk";
+import { encodeAddress } from "algosdk";
 import { fromIntToBytes8Hex, getParsedValueFromState } from "../../utils";
 import { calcConversionRate, calcLPPrice, minimum } from "./math";
-import { ConversionRate, LPToken, Oracle, OraclePrice, OraclePrices } from "./types";
+import type { ConversionRate, LPToken, Oracle, OraclePrice, OraclePrices } from "./types";
 
 function parseOracleValue(base64Value: string) {
   const value = Buffer.from(base64Value, "base64").toString("hex");
