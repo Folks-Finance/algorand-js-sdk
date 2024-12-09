@@ -171,6 +171,7 @@ async function getStakedRewardsInfo(
   const res = await req.do();
 
   // escrow local state
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const state = res["account"]["apps-local-state"]?.find((app: any) => app.id === appId)?.["key-value"];
   if (state === undefined)
     throw new Error("Unable to find escrow: " + escrowAddr + " for rewards aggregator " + appId + ".");

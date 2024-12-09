@@ -89,7 +89,8 @@ async function getLoansInfo(
   const res = await getEscrows(indexerClient, tokenPair, nextToken, round);
 
   // derive loans info
-  let loans: LoanInfo[] = [];
+  const loans: LoanInfo[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   res["accounts"].forEach((account: any) => {
     try {
       const loan = loanInfo(
@@ -102,7 +103,9 @@ async function getLoansInfo(
         res["current-round"],
       );
       loans.push(loan);
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
   });
 
   return {

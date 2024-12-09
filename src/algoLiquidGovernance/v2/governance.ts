@@ -162,7 +162,9 @@ async function getEscrowGovernanceStatus(
               xGovControlAddress: data["xGv"],
             },
           };
-      } catch (e) {}
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 

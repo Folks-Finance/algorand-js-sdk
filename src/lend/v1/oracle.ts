@@ -42,6 +42,7 @@ async function getTinymanLPPrice(
   const res = await indexerClient.lookupAccountByID(poolAddress).do();
   const { account } = res;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const state = account["apps-local-state"]?.find((app: any) => app.id === validatorAppId)?.["key-value"];
   if (state === undefined)
     throw new Error(`Unable to find Tinyman Pool: ${poolAddress} for validator app ${validatorAppId}.`);

@@ -76,6 +76,7 @@ async function getUserLiquidGovernanceInfo(
   const res = await req.do();
 
   // user local state
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const state = res["apps-local-states"]?.find((app: any) => app.id === appId)?.["key-value"];
   if (state === undefined) throw new Error("Unable to find commitment for: " + userAddr + ".");
   const commitment = BigInt(getParsedValueFromState(state, "commitment") || 0);

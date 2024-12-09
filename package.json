@@ -20,6 +20,7 @@
     "prepare": "husky",
     "clean": "rm -rf ./dist",
     "build": "pnpm run clean && tsc -p tsconfig.json",
+    "lint": "eslint .",
     "prepack": "pnpm run build",
     "docs": "typedoc src/index.ts --options typedoc.config.json --tsconfig tsconfig.json",
     "format": "prettier --write 'src/**/*'",
@@ -31,13 +32,18 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.10",
+    "@eslint/js": "^9.16.0",
     "@types/node": "^22.10.1",
+    "eslint": "^9.16.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.13.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
     "prettier": "^3.4.2",
     "ts-node": "^10.9.1",
     "typedoc": "^0.27.4",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.17.0"
   },
   "author": "Folks Finance",
   "license": "MIT",

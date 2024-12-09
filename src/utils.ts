@@ -49,9 +49,8 @@ async function getApplicationGlobalState(
   currentRound?: number;
   globalState?: TealKeyValue[];
 }> {
-  const res = await (client instanceof Algodv2
-    ? client.getApplicationByID(appId)
-    : client.lookupApplications(appId)
+  const res = await (
+    client instanceof Algodv2 ? client.getApplicationByID(appId) : client.lookupApplications(appId)
   ).do();
 
   // algod https://developer.algorand.org/docs/rest-apis/algod/#application
@@ -75,14 +74,16 @@ async function getAccountApplicationLocalState(
   currentRound?: number;
   localState?: TealKeyValue[];
 }> {
-  const res = await (client instanceof Algodv2
-    ? client.accountApplicationInformation(addr, appId)
-    : client.lookupAccountAppLocalStates(addr).applicationID(appId)
+  const res = await (
+    client instanceof Algodv2
+      ? client.accountApplicationInformation(addr, appId)
+      : client.lookupAccountAppLocalStates(addr).applicationID(appId)
   ).do();
 
   // algod https://developer.algorand.org/docs/rest-apis/algod/#accountapplicationinformation-response-200
   // indexer https://developer.algorand.org/docs/rest-apis/indexer/#lookupaccountapplocalstates-response-200
   const localState =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     client instanceof Algodv2 ? res["app-local-state"] : res["apps-local-states"]?.find(({ id }: any) => id === appId);
 
   return {
@@ -95,9 +96,10 @@ async function getAccountApplicationLocalState(
  * Wraps a call to Algorand client (algod/indexer) and returns box value
  */
 async function getApplicationBox(client: Algodv2 | Indexer, appId: number, boxName: Uint8Array): Promise<Box> {
-  return await (client instanceof Algodv2
-    ? client.getApplicationBoxByName(appId, boxName)
-    : client.lookupApplicationBoxByIDandName(appId, boxName)
+  return await (
+    client instanceof Algodv2
+      ? client.getApplicationBoxByName(appId, boxName)
+      : client.lookupApplicationBoxByIDandName(appId, boxName)
   ).do();
 }
 
@@ -115,9 +117,10 @@ async function getAccountDetails(
   const holdings: Map<number, bigint> = new Map();
 
   try {
-    const res = await (client instanceof Algodv2
-      ? client.accountInformation(addr)
-      : client.lookupAccountByID(addr).exclude("apps-local-state,created-apps")
+    const res = await (
+      client instanceof Algodv2
+        ? client.accountInformation(addr)
+        : client.lookupAccountByID(addr).exclude("apps-local-state,created-apps")
     ).do();
 
     // algod https://developer.algorand.org/docs/rest-apis/algod/#account
@@ -126,6 +129,7 @@ async function getAccountDetails(
     const assets = account["assets"] || [];
 
     holdings.set(0, BigInt(account["amount"])); // includes min balance
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     assets.forEach(({ "asset-id": assetId, amount }: any) => holdings.set(assetId, BigInt(amount)));
 
     return {
@@ -133,6 +137,7 @@ async function getAccountDetails(
       isOnline: account["status"] === "Online",
       holdings,
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     if (e.status === 404 && e.response?.text?.includes("no accounts found for address")) {
       holdings.set(0, BigInt(0));

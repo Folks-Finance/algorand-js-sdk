@@ -42,6 +42,7 @@ async function retrievePoolManagerInfo(client: Algodv2 | Indexer, poolManagerApp
   const { currentRound, globalState: state } = await getApplicationGlobalState(client, poolManagerAppId);
   if (state === undefined) throw Error("Could not find Pool Manager");
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pools: Record<number, any> = {};
   for (let i = 0; i < 63; i++) {
     const poolBase64Value = String(getParsedValueFromState(state, fromIntToByteHex(i), "hex"));

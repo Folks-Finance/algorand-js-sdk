@@ -63,6 +63,7 @@ async function getConsensusState(algodClient: Algodv2, consensusConfig: Consensu
   });
   const { methodResults } = await atc.simulate(algodClient, simReq);
   const { returnValue } = methodResults[0];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [algoBalance, xAlgoCirculatingSupply, balances]: [bigint, bigint, Uint8Array] = returnValue as any;
 
   // proposers

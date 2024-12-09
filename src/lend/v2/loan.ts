@@ -252,6 +252,7 @@ async function retrieveLiquidatableLoans(
   // convert to user loan info and add if liquidatable
   for (const acc of res["accounts"]) {
     const escrowAddr = acc["address"];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const state = acc["apps-local-state"]?.find(({ id }: any) => id === loanAppId)?.["key-value"];
     const localState = loanLocalState(state, loanAppId, escrowAddr);
     const loan = userLoanInfo(localState, poolManagerInfo, loanInfo, oraclePrices);

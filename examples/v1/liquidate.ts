@@ -52,6 +52,7 @@ async function liquidateLoans(
         await waitForConfirmation(algodClient, txId, 1000);
         console.log("Successfully liquidated: " + escrowAddress);
       } catch (e) {
+        console.error(e);
         console.log("Failed to liquidate: " + escrowAddress);
       }
     }

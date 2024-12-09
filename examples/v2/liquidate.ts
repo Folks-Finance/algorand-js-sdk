@@ -43,7 +43,11 @@ export const getUserLoanAssets = (pools: Record<string, Pool>, userLoan: UserLoa
   // add to lp assets and base assets
   loanPoolAppIds.forEach((poolAppId) => {
     const asset = getAssetFromAppId(pools, poolAppId);
-    Number.isNaN(asset) ? lpAssets.push(asset as LPToken) : baseAssetIds.push(asset as number);
+    if (Number.isNaN(asset)) {
+      lpAssets.push(asset as LPToken);
+    } else {
+      baseAssetIds.push(asset as number);
+    }
   });
 
   return { lpAssets, baseAssetIds };
@@ -130,6 +134,7 @@ async function main() {
         await waitForConfirmation(algodClient, txId, 1000);
         console.log("Successfully liquidated: " + loan.escrowAddress);
       } catch (e) {
+        console.error(e);
         console.log("Failed to liquidate: " + loan.escrowAddress);
       }
     }

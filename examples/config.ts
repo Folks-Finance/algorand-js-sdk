@@ -1,4 +1,9 @@
-import { Algodv2, generateAccount, Indexer, mnemonicToSecretKey } from "algosdk";
+import {
+  Algodv2,
+  generateAccount,
+  Indexer,
+  //mnemonicToSecretKey
+} from "algosdk";
 
 // TODO: Replace
 // export const sender = mnemonicToSecretKey("");

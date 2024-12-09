@@ -10,7 +10,7 @@ import { getParsedValueFromState, parseUint64s } from "../../utils";
  * @param dispenser - dispenser to query about
  * @returns DispenserInfo[] dispenser info
  */
-async function getDispenserInfo(indexerClient: Indexer, dispenser: Dispenser): Promise<DispenserInfo> {
+export async function getDispenserInfo(indexerClient: Indexer, dispenser: Dispenser): Promise<DispenserInfo> {
   const { appId } = dispenser;
   const res = await indexerClient.lookupApplications(appId).do();
   const state = res["application"]["params"]["global-state"];

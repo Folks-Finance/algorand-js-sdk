@@ -27,7 +27,9 @@ async function getLockAndEarns(indexerClient: Indexer, pool: Pool): Promise<Lock
 
   // build array of lock and earns
   const lockAndEarns: LockAndEarn[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   res["accounts"].forEach((account: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const state = account["apps-local-state"]?.find((app: any) => app.id === appId)?.["key-value"];
     const liquidityAppId = getParsedValueFromState(state, "liquidity_app_id");
     if (liquidityAppId !== undefined)
@@ -155,10 +157,12 @@ async function getLockedDepositInfo(
   const account = res["account"];
 
   // escrow balance
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lockedBalance = account["assets"]?.find((asset: any) => asset["asset-id"] === pool.fAssetId)?.["amount"];
   if (lockedBalance === undefined) throw new Error("Unable to get escrow: " + escrowAddr + " locked balance.");
 
   // escrow local state
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const state = account["apps-local-state"]?.find((app: any) => app.id === appId)?.["key-value"];
   if (state === undefined)
     throw new Error("Unable to find escrow: " + escrowAddr + " for lock and earn " + appId + ".");
