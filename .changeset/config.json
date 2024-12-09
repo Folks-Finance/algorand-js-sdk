@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.0.4/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "Folks-Finance/folks-finance-js-sdk" }],
+  "changelog": ["@changesets/changelog-github", { "repo": "Folks-Finance/algorand-js-sdk" }],
   "commit": false,
   "access": "public",
   "baseBranch": "main",

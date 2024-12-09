@@ -1,4 +1,4 @@
-# folks-finance-js-sdk
+# @folks-finance/algorand-sdk
 
 The official JavaScript SDK for the Algorand Folks Finance protocol
 
@@ -7,12 +7,12 @@ The official JavaScript SDK for the Algorand Folks Finance protocol
 Using [Node.js](https://nodejs.org/en/download/):
 
 ```bash
-npm install folks-finance-js-sdk
+npm install @folks-finance/algorand-sdk
 ```
 
 ## Documentation
 
-Documentation for this SDK is available at <https://folks-finance.github.io/folks-finance-js-sdk/>.
+Documentation for this SDK is available at <https://folks-finance.github.io/algorand-js-sdk/>.
 
 ## Running examples
 
