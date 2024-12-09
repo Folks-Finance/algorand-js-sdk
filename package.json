@@ -20,6 +20,7 @@
     "prepare": "husky",
     "clean": "rm -rf ./dist",
     "build": "pnpm run clean && tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "prepack": "pnpm run build",
     "docs": "typedoc src/index.ts --options typedoc.config.json --tsconfig tsconfig.json",
