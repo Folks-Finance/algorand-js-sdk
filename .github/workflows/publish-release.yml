@@ -6,25 +6,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup pnpm # by default it uses the version set in the package.json as packageManager
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        shell: bash
-        env:
-          HUSKY: "0"
-        run: pnpm install --frozen-lockfile
+      - name: Setup
+        uses: ./.github/actions/setup
 
       - name: Build
-        run: pnpm run build
+        run: pnpm build
 
-      - run: pnpx pkg-pr-new publish --compact --no-template
+      - run: pnpx pkg-pr-new publish --compact
