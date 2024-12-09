@@ -21,7 +21,6 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "prepack": "pnpm run build",
     "docs": "typedoc src/index.ts --options typedoc.config.json --tsconfig tsconfig.json",
     "format": "prettier --write 'src/**/*'",
     "example": "ts-node --project tsconfig.json"
