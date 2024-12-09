@@ -19,7 +19,8 @@
     "lint": "eslint .",
     "format": "prettier --write 'src/**/*'",
     "gen-docs": "typedoc",
-    "example": "ts-node --project tsconfig.json"
+    "example": "ts-node --project tsconfig.json",
+    "release": "pnpm build && changeset publish"
   },
   "dependencies": {
     "algosdk": "^2.9.0"
