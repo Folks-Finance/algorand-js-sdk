@@ -41,13 +41,7 @@ async function main() {
     algoTxnIndexForFlashLoanEnd,
     params,
   );
-  const algoFlashLoanEnd = prepareFlashLoanEnd(
-    pools.ALGO,
-    sender.addr,
-    reserveAddress,
-    algoRepaymentAmount,
-    params,
-  );
+  const algoFlashLoanEnd = prepareFlashLoanEnd(pools.ALGO, sender.addr, reserveAddress, algoRepaymentAmount, params);
 
   // flash loan of 1 USDC, repayment will be 1.001 USDC (0.1% + 1)
   const usdcBorrowAmount = 1e6;
@@ -61,13 +55,7 @@ async function main() {
     usdcTxnIndexForFlashLoanEnd,
     params,
   );
-  const usdcFlashLoanEnd = prepareFlashLoanEnd(
-    pools.USDC,
-    sender.addr,
-    reserveAddress,
-    usdcRepaymentAmount,
-    params,
-  );
+  const usdcFlashLoanEnd = prepareFlashLoanEnd(pools.USDC, sender.addr, reserveAddress, usdcRepaymentAmount, params);
 
   // build
   const flashLoanTxns: Transaction[] = [
@@ -80,7 +68,7 @@ async function main() {
 
   // group, sign and submit
   assignGroupID(flashLoanTxns);
-  const signedTxns = flashLoanTxns.map(txn => txn.signTxn(sender.sk));
+  const signedTxns = flashLoanTxns.map((txn) => txn.signTxn(sender.sk));
   await algodClient.sendRawTransaction(signedTxns).do();
 }
 

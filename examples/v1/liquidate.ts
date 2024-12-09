@@ -1,4 +1,4 @@
-import { SuggestedParams, waitForConfirmation} from "algosdk";
+import { SuggestedParams, waitForConfirmation } from "algosdk";
 import {
   getConversionRate,
   getLoansInfo,
@@ -12,12 +12,12 @@ import {
   TestnetOracle,
   TestnetReserveAddress,
   TestnetTokenPairs,
-  TokenPair
+  TokenPair,
 } from "../../src/lend/v1";
 import { algodClient, indexerClient, sender } from "../config";
 
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function liquidateLoans(
@@ -44,7 +44,7 @@ async function liquidateLoans(
       );
 
       // sign transactions
-      const signedTxns = txns.map(txn => txn.signTxn(sender.sk));
+      const signedTxns = txns.map((txn) => txn.signTxn(sender.sk));
 
       // submit transactions
       try {
@@ -78,7 +78,14 @@ async function main() {
   const params = await algodClient.getTransactionParams().do();
 
   // loop through escrows
-  let loansInfo = await getLoansInfo(indexerClient, tokenPair, tokenPairInfo, collateralPoolInfo, borrowPoolInfo, conversionRate);
+  let loansInfo = await getLoansInfo(
+    indexerClient,
+    tokenPair,
+    tokenPairInfo,
+    collateralPoolInfo,
+    borrowPoolInfo,
+    conversionRate,
+  );
   let loans = loansInfo.loans;
   let nextToken = loansInfo.nextToken;
 
@@ -90,7 +97,15 @@ async function main() {
     await sleep(100);
 
     // next loop of escrows
-    loansInfo = await getLoansInfo(indexerClient, tokenPair, tokenPairInfo, collateralPoolInfo, borrowPoolInfo, conversionRate, nextToken);
+    loansInfo = await getLoansInfo(
+      indexerClient,
+      tokenPair,
+      tokenPairInfo,
+      collateralPoolInfo,
+      borrowPoolInfo,
+      conversionRate,
+      nextToken,
+    );
     loans = loansInfo.loans;
     nextToken = loansInfo.nextToken;
 

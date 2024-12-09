@@ -1,9 +1,5 @@
 import { assignGroupID, Transaction } from "algosdk";
-import {
-  TestnetPools,
-  TestnetReserveAddress,
-  wrapWithFlashLoan
-} from "../../src";
+import { TestnetPools, TestnetReserveAddress, wrapWithFlashLoan } from "../../src";
 import { algodClient, sender } from "../config";
 
 async function main() {
@@ -38,7 +34,7 @@ async function main() {
 
   // group, sign and submit
   assignGroupID(flashLoanTxns);
-  const signedTxns = flashLoanTxns.map(txn => txn.signTxn(sender.sk));
+  const signedTxns = flashLoanTxns.map((txn) => txn.signTxn(sender.sk));
   await algodClient.sendRawTransaction(signedTxns).do();
 }
 

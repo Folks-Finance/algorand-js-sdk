@@ -20,7 +20,7 @@ import {
 import { algodClient, indexerClient, sender } from "../config";
 
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 const isLPTokenPool = (pool: Pool): pool is LPTokenPool => {
@@ -76,7 +76,7 @@ async function main() {
     await sleep(100);
 
     // find liquidatable loans
-    const liquidatableLoans: { loans: UserLoanInfo[], nextToken?: string } = await retrieveLiquidatableLoans(
+    const liquidatableLoans: { loans: UserLoanInfo[]; nextToken?: string } = await retrieveLiquidatableLoans(
       indexerClient,
       loanAppId,
       poolManagerInfo,
@@ -89,7 +89,9 @@ async function main() {
     // liquidate
     for (const loan of liquidatableLoans.loans) {
       // decide on which collateral to seize
-      const [, collateralPool] = Object.entries(pools).find(([_, pool]) => pool.appId === loan.collaterals[0].poolAppId)!;
+      const [, collateralPool] = Object.entries(pools).find(
+        ([_, pool]) => pool.appId === loan.collaterals[0].poolAppId,
+      )!;
 
       // decide on which borrow to repay
       const [, borrowPool] = Object.entries(pools).find(([_, pool]) => pool.appId === loan.borrows[0].poolAppId)!;
@@ -128,7 +130,7 @@ async function main() {
 
       // group, sign and submit
       assignGroupID(liquidateTxns);
-      const signedTxns = liquidateTxns.map(txn => txn.signTxn(sender.sk));
+      const signedTxns = liquidateTxns.map((txn) => txn.signTxn(sender.sk));
       try {
         const { txId } = await algodClient.sendRawTransaction(signedTxns).do();
         await waitForConfirmation(algodClient, txId, 1000);
@@ -139,7 +141,6 @@ async function main() {
       }
     }
   } while (nextToken !== undefined);
-
 }
 
 main().catch(console.error);
