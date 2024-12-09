@@ -1,6 +1,6 @@
 {
-  "name": "folks-finance-js-sdk",
-  "version": "0.16.2",
+  "name": "@folks-finance/algorand-sdk",
+  "version": "0.0.0",
   "description": "The official JavaScript SDK for the Folks Finance Protocol",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -10,28 +10,30 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Folks-Finance/folks-finance-js-sdk.git"
+    "url": "git+https://github.com/Folks-Finance/algorand-js-sdk.git"
   },
   "keywords": [
     "Folks Finance",
     "Algorand"
   ],
   "scripts": {
+    "prepare": "husky",
     "clean": "rm -rf ./dist",
-    "build": "npm run clean && tsc -p tsconfig.json",
-    "prepack": "npm run build",
+    "build": "pnpm run clean && tsc -p tsconfig.json",
+    "prepack": "pnpm run build",
     "docs": "typedoc src/index.ts --options typedoc.config.json --tsconfig tsconfig.json",
     "format": "prettier --write 'src/**/*'",
-    "example": "ts-node --project tsconfig.json",
-    "prepare": "husky install"
+    "example": "ts-node --project tsconfig.json"
   },
   "dependencies": {
     "algosdk": "^2.9.0"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.0",
+    "@changesets/cli": "^2.27.10",
     "@types/mocha": "^10.0.7",
     "@types/node": "^17.0.21",
-    "husky": "^8.0.2",
+    "husky": "^9.1.7",
     "lint-staged": "^13.1.0",
     "mocha": "^10.7.3",
     "prettier": "^2.8.0",
@@ -43,5 +45,6 @@
   "license": "MIT",
   "lint-staged": {
     "*.src/**/*": "prettier --write"
-  }
+  },
+  "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
 }
