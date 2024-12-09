@@ -1,6 +1,6 @@
 # folks-finance-js-sdk
 
-The official JavaScript SDK for the Folks Finance Protocol
+The official JavaScript SDK for the Algorand Folks Finance protocol
 
 ## Installation
 
