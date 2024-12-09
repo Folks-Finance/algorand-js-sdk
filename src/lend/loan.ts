@@ -7,7 +7,7 @@ import {
   makeApplicationCloseOutTxn,
   OnApplicationComplete,
 } from "algosdk";
-import { divScale, minimum, mulScale, ONE_10_DP, ONE_4_DP } from "../../math-lib";
+import { divScale, minimum, mulScale, ONE_10_DP, ONE_4_DP } from "../math-lib";
 import {
   addEscrowNoteTransaction,
   fromIntToByteHex,
@@ -17,7 +17,7 @@ import {
   removeEscrowNoteTransaction,
   signer,
   transferAlgoOrAsset,
-} from "../../utils";
+} from "../utils";
 import { loanABIContract, poolABIContract } from "./abi-contracts";
 import { retrievePoolManagerInfo } from "./deposit";
 import { calcBorrowUtilisationRatio, calcDepositReturn, calcFlashLoanRepayment } from "./formulae";

@@ -7,7 +7,7 @@ import {
   makeApplicationCloseOutTxn,
   OnApplicationComplete,
 } from "algosdk";
-import { maximum } from "../../math-lib";
+import { maximum } from "../math-lib";
 import {
   addEscrowNoteTransaction,
   fromIntToByteHex,
@@ -18,7 +18,7 @@ import {
   removeEscrowNoteTransaction,
   signer,
   unixTime,
-} from "../../utils";
+} from "../utils";
 import { depositStakingABIContract } from "./abi-contracts";
 import type { DepositStakingInfo, Pool, UserDepositStakingLocalState } from "./types";
 import { depositStakingLocalState, depositStakingProgramsInfo, getEscrows, userDepositStakingInfo } from "./utils";

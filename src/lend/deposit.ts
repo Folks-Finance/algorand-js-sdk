@@ -7,7 +7,7 @@ import {
   makeApplicationCloseOutTxn,
   OnApplicationComplete,
 } from "algosdk";
-import { compoundEveryHour, compoundEverySecond, mulScale, ONE_10_DP, ONE_16_DP, UINT64 } from "../../math-lib";
+import { compoundEveryHour, compoundEverySecond, mulScale, ONE_10_DP, ONE_16_DP, UINT64 } from "../math-lib";
 import {
   addEscrowNoteTransaction,
   fromIntToByteHex,
@@ -19,7 +19,7 @@ import {
   removeEscrowNoteTransaction,
   signer,
   transferAlgoOrAsset,
-} from "../../utils";
+} from "../utils";
 import { depositsABIContract, poolABIContract } from "./abi-contracts";
 import { calcBorrowInterestIndex, calcDepositInterestIndex, calcWithdrawReturn } from "./formulae";
 import { getOraclePrices } from "./oracle";
