@@ -1,6 +1,7 @@
 # @folks-finance/algorand-sdk
 
 [![License: MIT][license-image]][license-url]
+[![CI][ci-image]][ci-url]
 [![NPM version][npm-image]][npm-url]
 [![Downloads][downloads-image]][npm-url]
 
@@ -56,6 +57,8 @@ pnpm example examples/v2/liquidate.ts
 
 [license-image]: https://img.shields.io/badge/License-MIT-brightgreen.svg?style=flat-square
 [license-url]: https://opensource.org/licenses/MIT
+[ci-image]: https://img.shields.io/github/actions/workflow/status/Folks-Finance/algorand-js-sdk/lint-and-typecheck.yml?branch=main&logo=github&style=flat-square
+[ci-url]: https://github.com/Folks-Finance/algorand-js-sdk/actions/workflows/lint-and-typecheck.yml
 [npm-image]: https://img.shields.io/npm/v/@folks-finance/algorand-sdk.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/@folks-finance/algorand-sdk
 [downloads-image]: https://img.shields.io/npm/dm/@folks-finance/algorand-sdk.svg?style=flat-square
