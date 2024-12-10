@@ -10,7 +10,6 @@ import {
   modelsv2,
 } from "algosdk";
 
-import { mulScale } from "../math-lib";
 import {
   enc,
   getApplicationBox,
@@ -22,10 +21,6 @@ import {
 } from "../utils";
 
 import { xAlgoABIContract } from "./abi-contracts";
-import {
-  greedyStakeAllocationStrategy as defaultStakeAllocationStrategy,
-  greedyUnstakeAllocationStrategy as defaultUnstakeAllocationStrategy,
-} from "./allocation-strategies";
 
 import type { ConsensusConfig, ConsensusState } from "./types";
 import type { Address, Algodv2, SuggestedParams, Transaction } from "algosdk";
@@ -76,7 +71,6 @@ async function getConsensusState(algodClient: Algodv2, consensusConfig: Consensu
   // global state
   const timeDelay = BigInt(getParsedValueFromState(state, "time_delay") || 0);
   const numProposers = BigInt(getParsedValueFromState(state, "num_proposers") || 0);
-  const minProposerBalance = BigInt(getParsedValueFromState(state, "min_proposer_balance") || 0);
   const maxProposerBalance = BigInt(getParsedValueFromState(state, "max_proposer_balance") || 0);
   const fee = BigInt(getParsedValueFromState(state, "fee") || 0);
   const premium = BigInt(getParsedValueFromState(state, "premium") || 0);
@@ -94,7 +88,6 @@ async function getConsensusState(algodClient: Algodv2, consensusConfig: Consensu
     proposersBalances,
     timeDelay,
     numProposers,
-    minProposerBalance,
     maxProposerBalance,
     fee,
     premium,
@@ -128,15 +121,11 @@ function prepareDummyTransaction(
   return txns[0];
 }
 
-// assumes txns has either structure:
-// period 1 [appl call, appl call, ...]
-// period 2 [transfer, appl call, transfer, appl call, ...]
 function getTxnsAfterResourceAllocation(
   consensusConfig: ConsensusConfig,
   consensusState: ConsensusState,
   txnsToAllocateTo: Transaction[],
   additionalAddresses: Address[],
-  period: number,
   senderAddr: string,
   params: SuggestedParams,
 ): Transaction[] {
@@ -144,16 +133,16 @@ function getTxnsAfterResourceAllocation(
 
   // make copy of txns
   const txns = txnsToAllocateTo.slice();
-  const availableCalls = txns.length / period;
+  const appCallTxnIndex = txns.length - 1;
 
   // add xALGO asset and proposers box
-  txns[period - 1].appForeignAssets = [xAlgoId];
+  txns[appCallTxnIndex].appForeignAssets = [xAlgoId];
   const box = { appIndex: appId, name: enc.encode("pr") };
-  const { boxes } = txns[period - 1];
+  const { boxes } = txns[appCallTxnIndex];
   if (boxes) {
     boxes.push(box);
   } else {
-    txns[period - 1].boxes = [box];
+    txns[appCallTxnIndex].boxes = [box];
   }
 
   // get all accounts we need to add
@@ -163,13 +152,10 @@ function getTxnsAfterResourceAllocation(
   // add accounts in groups of 4
   const MAX_FOREIGN_ACCOUNT_PER_TXN = 4;
   for (let i = 0; i < accounts.length; i += MAX_FOREIGN_ACCOUNT_PER_TXN) {
-    // which txn to use
-    const callNum = Math.floor(i / MAX_FOREIGN_ACCOUNT_PER_TXN) + 1;
+    // which txn to use and check to see if we need to add a dummy call
     let txnIndex: number;
-
-    // check if we need to add dummy call
-    if (callNum <= availableCalls) {
-      txnIndex = callNum * period - 1;
+    if (Math.floor(i / MAX_FOREIGN_ACCOUNT_PER_TXN) === 0) {
+      txnIndex = appCallTxnIndex;
     } else {
       txns.unshift(prepareDummyTransaction(consensusConfig, senderAddr, params));
       txnIndex = 0;
@@ -192,7 +178,6 @@ function getTxnsAfterResourceAllocation(
  * @param amount - amount of ALGO to send
  * @param minReceivedAmount - min amount of xALGO expected to receive
  * @param params - suggested params for the transactions with the fees overwritten
- * @param proposerAllocations - determines which proposers the ALGO sent goes to
  * @param note - optional note to distinguish who is the minter (must pass to be eligible for revenue share)
  * @returns Transaction[] stake transactions
  */
@@ -203,41 +188,33 @@ function prepareImmediateStakeTransactions(
   amount: number | bigint,
   minReceivedAmount: number | bigint,
   params: SuggestedParams,
-  proposerAllocations = defaultStakeAllocationStrategy(consensusState, amount),
   note?: Uint8Array,
 ): Transaction[] {
   const { appId } = consensusConfig;
 
+  const sendAlgo = {
+    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(appId), amount, params),
+    signer,
+  };
+  const fee = 1000 * (2 + consensusState.proposersBalances.length);
+
   const atc = new AtomicTransactionComposer();
-  for (const [proposerIndex, splitMintAmount] of proposerAllocations.entries()) {
-    if (splitMintAmount === BigInt(0)) continue;
-
-    // calculate min received amount by proportional of total mint amount
-    const splitMinReceivedAmount = mulScale(BigInt(minReceivedAmount), splitMintAmount, BigInt(amount));
-
-    // generate txns for single proposer
-    const { address: proposerAddress } = consensusState.proposersBalances[proposerIndex];
-    const sendAlgo = {
-      txn: transferAlgoOrAsset(0, senderAddr, proposerAddress, splitMintAmount, params),
-      signer,
-    };
-    atc.addMethodCall({
-      sender: senderAddr,
-      signer,
-      appID: appId,
-      method: getMethodByName(xAlgoABIContract.methods, "immediate_mint"),
-      methodArgs: [sendAlgo, proposerIndex, splitMinReceivedAmount],
-      suggestedParams: { ...params, flatFee: true, fee: 2000 },
-      note,
-    });
-  }
+  atc.addMethodCall({
+    sender: senderAddr,
+    signer,
+    appID: appId,
+    method: getMethodByName(xAlgoABIContract.methods, "immediate_mint"),
+    methodArgs: [sendAlgo, minReceivedAmount],
+    suggestedParams: { ...params, flatFee: true, fee },
+    note,
+  });
 
   // allocate resources
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
     return txn;
   });
-  return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [], 2, senderAddr, params);
+  return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [], senderAddr, params);
 }
 
 /**
@@ -250,7 +227,6 @@ function prepareImmediateStakeTransactions(
  * @param amount - amount of ALGO to send
  * @param params - suggested params for the transactions with the fees overwritten
  * @param includeBoxMinBalancePayment - whether to include ALGO payment to app for box min balance
- * @param proposerAllocations - determines which proposers the ALGO sent goes to
  * @param note - optional note to distinguish who is the minter (must pass to be eligible for revenue share)
  * @returns Transaction[] stake transactions
  */
@@ -261,41 +237,36 @@ function prepareDelayedStakeTransactions(
   amount: number | bigint,
   params: SuggestedParams,
   includeBoxMinBalancePayment = true,
-  proposerAllocations = defaultStakeAllocationStrategy(consensusState, amount),
   note?: Uint8Array,
 ): Transaction[] {
   const { appId } = consensusConfig;
 
-  const atc = new AtomicTransactionComposer();
-  for (const [proposerIndex, splitMintAmount] of proposerAllocations.entries()) {
-    if (splitMintAmount === BigInt(0)) continue;
+  const sendAlgo = {
+    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(appId), amount, params),
+    signer,
+  };
+  const fee = 1000 * (1 + consensusState.proposersBalances.length);
 
-    // generate txns for single proposer
-    const { address: proposerAddress } = consensusState.proposersBalances[proposerIndex];
-    const sendAlgo = {
-      txn: transferAlgoOrAsset(0, senderAddr, proposerAddress, splitMintAmount, params),
-      signer,
-    };
-    const nonce = randomBytes(2); // TODO: safeguard against possible clash?
-    const boxName = Uint8Array.from([...enc.encode("dm"), ...decodeAddress(senderAddr).publicKey, ...nonce]);
-    atc.addMethodCall({
-      sender: senderAddr,
-      signer,
-      appID: appId,
-      method: getMethodByName(xAlgoABIContract.methods, "delayed_mint"),
-      methodArgs: [sendAlgo, proposerIndex, nonce],
-      boxes: [{ appIndex: appId, name: boxName }],
-      suggestedParams: { ...params, flatFee: true, fee: 2000 },
-      note,
-    });
-  }
+  const atc = new AtomicTransactionComposer();
+  const nonce = randomBytes(2); // TODO: safeguard against possible clash?
+  const boxName = Uint8Array.from([...enc.encode("dm"), ...decodeAddress(senderAddr).publicKey, ...nonce]);
+  atc.addMethodCall({
+    sender: senderAddr,
+    signer,
+    appID: appId,
+    method: getMethodByName(xAlgoABIContract.methods, "delayed_mint"),
+    methodArgs: [sendAlgo, nonce],
+    boxes: [{ appIndex: appId, name: boxName }],
+    suggestedParams: { ...params, flatFee: true, fee },
+    note,
+  });
 
   // allocate resources
   let txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
     return txn;
   });
-  txns = getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [], 2, senderAddr, params);
+  txns = getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [], senderAddr, params);
 
   // add box min balance payment if specified
   if (includeBoxMinBalancePayment) {
@@ -349,7 +320,6 @@ function prepareClaimDelayedStakeTransactions(
     consensusState,
     txns,
     [decodeAddress(receiverAddr)],
-    1,
     senderAddr,
     params,
   );
@@ -365,7 +335,6 @@ function prepareClaimDelayedStakeTransactions(
  * @param amount - amount of xALGO to send
  * @param minReceivedAmount - min amount of ALGO expected to receive
  * @param params - suggested params for the transactions with the fees overwritten
- * @param proposerAllocations - determines which proposers the ALGO received comes from
  * @param note - optional note to distinguish who is the burner (must pass to be eligible for revenue share)
  * @returns Transaction[] unstake transactions
  */
@@ -376,40 +345,33 @@ function prepareUnstakeTransactions(
   amount: number | bigint,
   minReceivedAmount: number | bigint,
   params: SuggestedParams,
-  proposerAllocations = defaultUnstakeAllocationStrategy(consensusState, amount),
   note?: Uint8Array,
 ): Transaction[] {
   const { appId, xAlgoId } = consensusConfig;
 
+  const sendXAlgo = {
+    txn: transferAlgoOrAsset(xAlgoId, senderAddr, getApplicationAddress(appId), amount, params),
+    signer,
+  };
+  const fee = 1000 * (2 + consensusState.proposersBalances.length);
+
   const atc = new AtomicTransactionComposer();
-  for (const [proposerIndex, splitBurnAmount] of proposerAllocations.entries()) {
-    if (splitBurnAmount === BigInt(0)) continue;
-
-    // calculate min received amount by proportional of total burn amount
-    const splitMinReceivedAmount = mulScale(BigInt(minReceivedAmount), splitBurnAmount, BigInt(amount));
-
-    // generate txns for single proposer
-    const sendXAlgo = {
-      txn: transferAlgoOrAsset(xAlgoId, senderAddr, getApplicationAddress(appId), splitBurnAmount, params),
-      signer,
-    };
-    atc.addMethodCall({
-      sender: senderAddr,
-      signer,
-      appID: appId,
-      method: getMethodByName(xAlgoABIContract.methods, "burn"),
-      methodArgs: [sendXAlgo, proposerIndex, splitMinReceivedAmount],
-      suggestedParams: { ...params, flatFee: true, fee: 2000 },
-      note,
-    });
-  }
+  atc.addMethodCall({
+    sender: senderAddr,
+    signer,
+    appID: appId,
+    method: getMethodByName(xAlgoABIContract.methods, "burn"),
+    methodArgs: [sendXAlgo, minReceivedAmount],
+    suggestedParams: { ...params, flatFee: true, fee },
+    note,
+  });
 
   // allocate resources
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
     return txn;
   });
-  return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [], 2, senderAddr, params);
+  return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [], senderAddr, params);
 }
 
 export {
