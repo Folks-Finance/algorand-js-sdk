@@ -13,7 +13,6 @@ interface ConsensusState {
   }[];
   timeDelay: bigint;
   numProposers: bigint;
-  minProposerBalance: bigint;
   maxProposerBalance: bigint;
   fee: bigint; // 4 d.p.
   premium: bigint; // 16 d.p.

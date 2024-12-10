@@ -1,20 +1,102 @@
 {
   "name": "XAlgo",
+  "desc": "Allows users to participate in consensus and receive a liquid staking token",
   "methods": [
     {
-      "name": "immediate_mint",
+      "name": "set_proposer_admin",
+      "desc": "Privileged operation to set the proposer admin.",
+      "args": [
+        {
+          "type": "uint8",
+          "name": "proposer_index",
+          "desc": "The index of proposer to set the admin of"
+        },
+        {
+          "type": "address",
+          "name": "new_proposer_admin",
+          "desc": "The new proposer admin"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "register_online",
+      "desc": "Privileged operation to register a proposer online",
       "args": [
         {
           "type": "pay",
-          "name": "send_algo"
+          "name": "send_algo",
+          "desc": "Send ALGO to the proposer to pay for the register online fee"
         },
         {
           "type": "uint8",
-          "name": "proposer_index"
+          "name": "proposer_index",
+          "desc": "The index of proposer to register online with"
+        },
+        {
+          "type": "address",
+          "name": "vote_key",
+          "desc": "The root participation public key (if any) currently registered for this round"
+        },
+        {
+          "type": "address",
+          "name": "sel_key",
+          "desc": "The selection public key (if any) currently registered for this round"
+        },
+        {
+          "type": "byte[64]",
+          "name": "state_proof_key",
+          "desc": "The root of the state proof key (if any)"
         },
         {
           "type": "uint64",
-          "name": "min_received"
+          "name": "vote_first",
+          "desc": "The first round for which this participation is valid"
+        },
+        {
+          "type": "uint64",
+          "name": "vote_last",
+          "desc": "The last round for which this participation is valid"
+        },
+        {
+          "type": "uint64",
+          "name": "vote_key_dilution",
+          "desc": "The number of subkeys in each batch of participation keys"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "register_offline",
+      "desc": "Privileged operation to register a proposer offline",
+      "args": [
+        {
+          "type": "uint8",
+          "name": "proposer_index",
+          "desc": "The index of proposer to register offline with"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "immediate_mint",
+      "desc": "Send ALGO to the app and receive xALGO immediately",
+      "args": [
+        {
+          "type": "pay",
+          "name": "send_algo",
+          "desc": "Send ALGO to the app to mint"
+        },
+        {
+          "type": "uint64",
+          "name": "min_received",
+          "desc": "The minimum amount of xALGO to receive in return"
         }
       ],
       "returns": {
@@ -23,18 +105,17 @@
     },
     {
       "name": "delayed_mint",
+      "desc": "Send ALGO to the app and receive xALGO after 320 rounds",
       "args": [
         {
           "type": "pay",
-          "name": "send_algo"
-        },
-        {
-          "type": "uint8",
-          "name": "proposer_index"
+          "name": "send_algo",
+          "desc": "Send ALGO to the app to mint"
         },
         {
           "type": "byte[2]",
-          "name": "nonce"
+          "name": "nonce",
+          "desc": "The nonce used to create the box to store the delayed mint"
         }
       ],
       "returns": {
@@ -43,14 +124,17 @@
     },
     {
       "name": "claim_delayed_mint",
+      "desc": "Claim delayed mint after 320 rounds",
       "args": [
         {
           "type": "address",
-          "name": "receiver"
+          "name": "receiver",
+          "desc": "The address the claim the delayed mint for"
         },
         {
           "type": "byte[2]",
-          "name": "nonce"
+          "name": "nonce",
+          "desc": "The nonce used to create the box which stores the delayed mint"
         }
       ],
       "returns": {
@@ -59,18 +143,17 @@
     },
     {
       "name": "burn",
+      "desc": "Send xALGO to the app and receive ALGO",
       "args": [
         {
           "type": "axfer",
-          "name": "send_xalgo"
-        },
-        {
-          "type": "uint8",
-          "name": "proposer_index"
+          "name": "send_xalgo",
+          "desc": "Send xALGO to the app to burn"
         },
         {
           "type": "uint64",
-          "name": "min_received"
+          "name": "min_received",
+          "desc": "The minimum amount of ALGO to receive in return"
         }
       ],
       "returns": {
@@ -79,13 +162,16 @@
     },
     {
       "name": "get_xalgo_rate",
+      "desc": "Get the conversion rate between xALGO and ALGO",
       "args": [],
       "returns": {
-        "type": "(uint64,uint64,byte[])"
+        "type": "(uint64,uint64,byte[])",
+        "desc": "Array of [algo_balance, x_algo_circulating_supply, proposers_balances]"
       }
     },
     {
       "name": "dummy",
+      "desc": "Dummy call to the app to bypass foreign accounts limit",
       "args": [],
       "returns": {
         "type": "void"
