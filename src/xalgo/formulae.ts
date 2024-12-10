@@ -1,6 +1,6 @@
-import { mulScale, ONE_16_DP } from "../math-lib";
+import { mulScale, ONE_16_DP } from "../math-lib.js";
 
-import type { ConsensusState } from "./types";
+import type { ConsensusState } from "./types.js";
 
 function convertAlgoToXAlgoWhenImmediate(algoAmount: bigint, consensusState: ConsensusState): bigint {
   const { algoBalance, xAlgoCirculatingSupply, premium } = consensusState;

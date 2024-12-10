@@ -18,12 +18,12 @@ import {
   getParsedValueFromState,
   signer,
   transferAlgoOrAsset,
-} from "../../utils";
+} from "../../utils.js";
 
-import { abiDistributor } from "./constants/abi-contracts";
+import { abiDistributor } from "./constants/abi-contracts.js";
 
-import type { DistributorInfo, EscrowGovernanceStatus, UserCommitmentInfo } from "./types";
-import type { Dispenser, Distributor } from "../common";
+import type { DistributorInfo, EscrowGovernanceStatus, UserCommitmentInfo } from "./types.js";
+import type { Dispenser, Distributor } from "../common/index.js";
 import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 
 function getDistributorLogicSig(userAddr: string): LogicSigAccount {

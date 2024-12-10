@@ -2,12 +2,21 @@
   "name": "@folks-finance/algorand-sdk",
   "version": "0.0.1",
   "description": "The official JavaScript SDK for the Folks Finance Protocol",
-  "main": "dist/index.js",
-  "types": "dist/types/index.d.ts",
+  "type": "module",
+  "sideEffects": false,
   "files": [
-    "dist/**/*",
+    "dist",
     "src"
   ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Folks-Finance/algorand-js-sdk.git"

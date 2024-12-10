@@ -1,7 +1,7 @@
 import { assignGroupID } from "algosdk";
 
-import { TestnetPools, TestnetReserveAddress, wrapWithFlashLoan } from "../../src";
-import { algodClient, sender } from "../config";
+import { TestnetPools, TestnetReserveAddress, wrapWithFlashLoan } from "../../src/index.js";
+import { algodClient, sender } from "../config.js";
 
 import type { Transaction } from "algosdk";
 

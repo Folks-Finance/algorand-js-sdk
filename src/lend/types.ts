@@ -367,8 +367,8 @@ interface OpUp {
 
 type ReserveAddress = string;
 
-export {
-  LPTokenProvider,
+export { LPTokenProvider, LoanType };
+export type {
   TinymanLPToken,
   PactLPToken,
   LPToken,
@@ -391,7 +391,6 @@ export {
   UserDepositStakingProgramInfo,
   UserDepositStakingInfo,
   PoolLoanInfo,
-  LoanType,
   LoanLocalState,
   LoanInfo,
   UserLoanInfoCollateral,

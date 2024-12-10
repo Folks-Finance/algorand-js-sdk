@@ -6,12 +6,12 @@ import {
   makeApplicationOptInTxn,
 } from "algosdk";
 
-import { getParsedValueFromState, signer, transferAlgoOrAsset } from "../../utils";
+import { getParsedValueFromState, signer, transferAlgoOrAsset } from "../../utils.js";
 
-import { abiDistributor } from "./constants/abi-contracts";
+import { abiDistributor } from "./constants/abi-contracts.js";
 
-import type { DistributorInfo, UserCommitmentInfo } from "./types";
-import type { Dispenser, Distributor } from "../common";
+import type { DistributorInfo, UserCommitmentInfo } from "./types.js";
+import type { Dispenser, Distributor } from "../common/index.js";
 import type { Indexer, SuggestedParams, Transaction } from "algosdk";
 
 /**

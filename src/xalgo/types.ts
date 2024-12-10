@@ -27,4 +27,4 @@ interface ConsensusState {
 
 type ProposerAllocations = bigint[];
 
-export { ConsensusConfig, ConsensusState, ProposerAllocations };
+export type { ConsensusConfig, ConsensusState, ProposerAllocations };

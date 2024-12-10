@@ -7,7 +7,7 @@ import {
   OnApplicationComplete,
 } from "algosdk";
 
-import { compoundEveryHour, compoundEverySecond, mulScale, ONE_10_DP, ONE_16_DP, UINT64 } from "../math-lib";
+import { compoundEveryHour, compoundEverySecond, mulScale, ONE_10_DP, ONE_16_DP, UINT64 } from "../math-lib.js";
 import {
   addEscrowNoteTransaction,
   fromIntToByteHex,
@@ -19,14 +19,14 @@ import {
   removeEscrowNoteTransaction,
   signer,
   transferAlgoOrAsset,
-} from "../utils";
+} from "../utils.js";
 
-import { depositsABIContract, poolABIContract } from "./abi-contracts";
-import { calcBorrowInterestIndex, calcDepositInterestIndex, calcWithdrawReturn } from "./formulae";
-import { getOraclePrices } from "./oracle";
-import { getEscrows } from "./utils";
+import { depositsABIContract, poolABIContract } from "./abi-contracts/index.js";
+import { calcBorrowInterestIndex, calcDepositInterestIndex, calcWithdrawReturn } from "./formulae.js";
+import { getOraclePrices } from "./oracle.js";
+import { getEscrows } from "./utils.js";
 
-import type { UserDepositFullInfo, Oracle, Pool, PoolInfo, PoolManagerInfo, UserDepositInfo } from "./types";
+import type { UserDepositFullInfo, Oracle, Pool, PoolInfo, PoolManagerInfo, UserDepositInfo } from "./types.js";
 import type { Account, Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 
 /**

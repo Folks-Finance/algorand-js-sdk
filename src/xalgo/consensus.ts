@@ -10,7 +10,7 @@ import {
   modelsv2,
 } from "algosdk";
 
-import { mulScale } from "../math-lib";
+import { mulScale } from "../math-lib.js";
 import {
   enc,
   getApplicationBox,
@@ -19,15 +19,15 @@ import {
   parseUint64s,
   signer,
   transferAlgoOrAsset,
-} from "../utils";
+} from "../utils.js";
 
-import { xAlgoABIContract } from "./abi-contracts";
+import { xAlgoABIContract } from "./abi-contracts/index.js";
 import {
   greedyStakeAllocationStrategy as defaultStakeAllocationStrategy,
   greedyUnstakeAllocationStrategy as defaultUnstakeAllocationStrategy,
-} from "./allocation-strategies";
+} from "./allocation-strategies/index.js";
 
-import type { ConsensusConfig, ConsensusState } from "./types";
+import type { ConsensusConfig, ConsensusState } from "./types.js";
 import type { Address, Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 /**

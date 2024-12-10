@@ -1,12 +1,28 @@
 {
-  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "lib": ["ES6", "DOM"],
-    "target": "ES6",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
-    "outDir": "dist",
-    "declarationDir": "dist/types",
-    "sourceMap": true
-  }
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    /* Strictness */
+    "strict": true,
+    "noImplicitOverride": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Since transpiling with TypeScript: */
+    "module": "NodeNext",
+    "sourceMap": true,
+
+    "declaration": true,
+    "lib": ["es2022"],
+
+    "outDir": "dist"
+  },
+  "include": ["src/**/*"]
 }

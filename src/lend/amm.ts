@@ -1,10 +1,10 @@
-import { compoundEveryHour, ONE_16_DP } from "../math-lib";
+import { compoundEveryHour, ONE_16_DP } from "../math-lib.js";
 import {
   getAccountApplicationLocalState,
   getApplicationGlobalState,
   getParsedValueFromState,
   parseUint64s,
-} from "../utils";
+} from "../utils.js";
 
 import type {
   PactLendingPool,
@@ -12,7 +12,7 @@ import type {
   PoolManagerInfo,
   TinymanLendingPool,
   TinymanLendingPoolInfo,
-} from "./types";
+} from "./types.js";
 import type { Algodv2, Indexer } from "algosdk";
 
 /**
@@ -39,7 +39,8 @@ async function retrievePactLendingPoolInfo(
   // pact pool swap fee interest
   const lpInfoRes = await fetch(`https://api.pact.fi/api/pools/${lendingPool.lpPoolAppId}`);
   if (!lpInfoRes.ok || lpInfoRes.status !== 200) throw Error("Failed to fetch pact swap fee from api");
-  const pactPoolData = await lpInfoRes.json();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pactPoolData = (await lpInfoRes.json()) as any;
   const swapFeeInterestRate = BigInt(Math.round(Number(pactPoolData?.["apr_7d"] || 0) * 1e16));
   const tvlUsd = Number(pactPoolData?.["tvl_usd"] || 0);
 
@@ -94,7 +95,8 @@ async function retrieveTinymanLendingPoolInfo(
   // pact pool swap fee interest
   const res = await fetch(`https://mainnet.analytics.tinyman.org/api/v1/pools/${lendingPool.lpPoolAppAddress}`);
   if (!res.ok || res.status !== 200) throw Error("Failed to fetch tinyman swap fee from api");
-  const tmPoolData = await res.json();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tmPoolData = (await res.json()) as any;
 
   const swapFeeInterestRate = BigInt(Math.round(Number(tmPoolData?.["annual_percentage_rate"] || 0) * 1e16));
   const swapFeeInterestYield = BigInt(Math.round(Number(tmPoolData?.["annual_percentage_yield"] || 0) * 1e16));

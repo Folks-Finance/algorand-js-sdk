@@ -1,6 +1,6 @@
-import { LoanType } from "../types";
+import { LoanType } from "../types.js";
 
-import type { OpUp, Oracle, Pool, ReserveAddress } from "../types";
+import type { OpUp, Oracle, Pool, ReserveAddress } from "../types.js";
 
 const TestnetPoolManagerAppId = 147157634;
 
@@ -112,10 +112,10 @@ const TestnetOpUp: OpUp = {
 export {
   TestnetPoolManagerAppId,
   TestnetDepositsAppId,
-  TestnetPoolKey,
   TestnetPools,
   TestnetLoans,
   TestnetReserveAddress,
   TestnetOracle,
   TestnetOpUp,
 };
+export type { TestnetPoolKey };

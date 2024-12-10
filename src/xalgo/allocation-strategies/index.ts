@@ -1,1 +1,1 @@
-export * from "./greedy";
+export * from "./greedy.js";

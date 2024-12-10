@@ -1,6 +1,6 @@
 import { encodeUint64, makeApplicationNoOpTxn } from "algosdk";
 
-import type { OpUp } from "./types";
+import type { OpUp } from "./types.js";
 import type { SuggestedParams, Transaction } from "algosdk";
 
 /**

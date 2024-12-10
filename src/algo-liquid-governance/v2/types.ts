@@ -30,4 +30,4 @@ interface EscrowGovernanceStatus {
   };
 }
 
-export { DistributorInfo, UserCommitmentInfo, EscrowGovernanceStatus };
+export type { DistributorInfo, UserCommitmentInfo, EscrowGovernanceStatus };

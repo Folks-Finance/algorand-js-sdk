@@ -1,4 +1,4 @@
-import type { Dispenser } from "./types";
+import type { Dispenser } from "./types.js";
 
 const govDispenser: Dispenser = {
   appId: 793119194,

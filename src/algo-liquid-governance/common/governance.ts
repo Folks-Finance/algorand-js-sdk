@@ -1,6 +1,6 @@
-import { getParsedValueFromState, parseUint64s } from "../../utils";
+import { getParsedValueFromState, parseUint64s } from "../../utils.js";
 
-import type { Dispenser, DispenserInfo } from "./types";
+import type { Dispenser, DispenserInfo } from "./types.js";
 import type { Indexer } from "algosdk";
 
 /**

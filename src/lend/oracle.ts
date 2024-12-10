@@ -1,21 +1,21 @@
 import { AtomicTransactionComposer, decodeAddress, decodeUint64, encodeAddress, getMethodByName } from "algosdk";
 
-import { minimum } from "../math-lib";
+import { minimum } from "../math-lib.js";
 import {
   fromIntToBytes8Hex,
   getAccountApplicationLocalState,
   getApplicationGlobalState,
   getParsedValueFromState,
   signer,
-} from "../utils";
+} from "../utils.js";
 
-import { lpTokenOracleABIContract, oracleAdapterABIContract } from "./abi-contracts";
-import { calcLPPrice } from "./formulae";
-import { LPTokenProvider } from "./types";
+import { lpTokenOracleABIContract, oracleAdapterABIContract } from "./abi-contracts/index.js";
+import { calcLPPrice } from "./formulae.js";
+import { LPTokenProvider } from "./types.js";
 
-import type { LPToken, Oracle, OraclePrice, OraclePrices, PactLPToken, TinymanLPToken } from "./types";
+import type { LPToken, Oracle, OraclePrice, OraclePrices, PactLPToken, TinymanLPToken } from "./types.js";
 import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
-import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types.js";
 
 function parseOracleValue(base64Value: string) {
   const value = Buffer.from(base64Value, "base64").toString("hex");

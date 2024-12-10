@@ -1,7 +1,7 @@
-import { ONE_4_DP } from "../../math-lib";
-import { LoanType, LPTokenProvider } from "../types";
+import { ONE_4_DP } from "../../math-lib.js";
+import { LoanType, LPTokenProvider } from "../types.js";
 
-import type { LendingPool, OpUp, Oracle, Pool, ReserveAddress } from "../types";
+import type { LendingPool, OpUp, Oracle, Pool, ReserveAddress } from "../types.js";
 
 const MainnetPoolManagerAppId = 971350278;
 
@@ -641,13 +641,12 @@ export {
   MainnetPoolManagerAppId,
   MainnetDepositsAppId,
   MainnetDepositStakingAppId,
-  MainnetPoolKey,
   MainnetPools,
   MainnetLoans,
   MainnetTinymanAppId,
-  MainnetLendingPoolKey,
   MainnetLendingPools,
   MainnetReserveAddress,
   MainnetOracle,
   MainnetOpUp,
 };
+export type { MainnetPoolKey, MainnetLendingPoolKey };

@@ -19,4 +19,4 @@ interface UserCommitmentInfo {
   commitmentClaimed: bigint; // amount of ALGOs the user has committed whose rewards have already been claimed
 }
 
-export { DistributorInfo, UserCommitmentInfo };
+export type { DistributorInfo, UserCommitmentInfo };

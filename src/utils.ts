@@ -7,7 +7,7 @@ import {
 } from "algosdk";
 
 import type { Indexer, SuggestedParams, Transaction } from "algosdk";
-import type { Box, TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import type { Box, TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types.js";
 
 const enc = new TextEncoder();
 

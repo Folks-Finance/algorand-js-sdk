@@ -12,15 +12,11 @@ import {
   TestnetOracle,
   TestnetPoolManagerAppId,
   TestnetPools,
-  TestnetReserveAddress
-} from "../../src";
-import { algodClient, indexerClient, sender } from "../config";
+  TestnetReserveAddress,
+} from "../../src/index.js";
+import { algodClient, indexerClient, sender } from "../config.js";
 
-import type {
-  LPToken,
-  LPTokenPool,
-  Pool,
-  UserLoanInfo} from "../../src";
+import type { LPToken, LPTokenPool, Pool, UserLoanInfo } from "../../src/index.js";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

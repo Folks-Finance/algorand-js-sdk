@@ -1,7 +1,15 @@
 import { encodeAddress, getApplicationAddress } from "algosdk";
 
-import { compoundEverySecond, maximum, mulScale, ONE_10_DP, ONE_16_DP, ONE_4_DP, SECONDS_IN_YEAR } from "../math-lib";
-import { enc, fromIntToByteHex, getParsedValueFromState, parseUint64s, unixTime } from "../utils";
+import {
+  compoundEverySecond,
+  maximum,
+  mulScale,
+  ONE_10_DP,
+  ONE_16_DP,
+  ONE_4_DP,
+  SECONDS_IN_YEAR,
+} from "../math-lib.js";
+import { enc, fromIntToByteHex, getParsedValueFromState, parseUint64s, unixTime } from "../utils.js";
 
 import {
   calcBorrowAssetLoanValue,
@@ -12,7 +20,7 @@ import {
   calcLiquidationMargin,
   calcLTVRatio,
   calcWithdrawReturn,
-} from "./formulae";
+} from "./formulae.js";
 
 import type {
   DepositStakingInfo,
@@ -28,9 +36,9 @@ import type {
   UserLoanInfo,
   UserLoanInfoBorrow,
   UserLoanInfoCollateral,
-} from "./types";
+} from "./types.js";
 import type { Indexer } from "algosdk";
-import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types.js";
 
 export async function getEscrows(
   indexerClient: Indexer,

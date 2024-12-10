@@ -1,9 +1,9 @@
-export * as algoLiquidGovernanceV1 from "./algo-liquid-governance/v1";
-export * from "./algo-liquid-governance/common";
-export * from "./algo-liquid-governance/v2";
+export * as algoLiquidGovernanceV1 from "./algo-liquid-governance/v1/index.js";
+export * from "./algo-liquid-governance/common/index.js";
+export * from "./algo-liquid-governance/v2/index.js";
 
-export * from "./lend";
+export * from "./lend/index.js";
 
-export * from "./xalgo";
+export * from "./xalgo/index.js";
 
-export * from "./math-lib";
+export * from "./math-lib.js";

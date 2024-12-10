@@ -10,8 +10,8 @@ import {
   ONE_4_DP,
   SECONDS_IN_YEAR,
   sqrt,
-} from "../math-lib";
-import { unixTime } from "../utils";
+} from "../math-lib.js";
+import { unixTime } from "../utils.js";
 
 /**
  * Calculates the dollar value of a given asset amount

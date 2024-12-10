@@ -1,4 +1,4 @@
-import type { Distributor } from "../../common";
+import type { Distributor } from "../../common/index.js";
 
 const govDistributor4: Distributor = {
   appId: 793119270,

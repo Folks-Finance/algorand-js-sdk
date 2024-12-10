@@ -7,7 +7,7 @@ import {
   OnApplicationComplete,
 } from "algosdk";
 
-import { maximum } from "../math-lib";
+import { maximum } from "../math-lib.js";
 import {
   addEscrowNoteTransaction,
   fromIntToByteHex,
@@ -18,12 +18,12 @@ import {
   removeEscrowNoteTransaction,
   signer,
   unixTime,
-} from "../utils";
+} from "../utils.js";
 
-import { depositStakingABIContract } from "./abi-contracts";
-import { depositStakingLocalState, depositStakingProgramsInfo, getEscrows, userDepositStakingInfo } from "./utils";
+import { depositStakingABIContract } from "./abi-contracts/index.js";
+import { depositStakingLocalState, depositStakingProgramsInfo, getEscrows, userDepositStakingInfo } from "./utils.js";
 
-import type { DepositStakingInfo, Pool, UserDepositStakingLocalState } from "./types";
+import type { DepositStakingInfo, Pool, UserDepositStakingLocalState } from "./types.js";
 import type { Account, Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 
 /**

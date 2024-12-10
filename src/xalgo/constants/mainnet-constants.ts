@@ -1,4 +1,4 @@
-import type { ConsensusConfig } from "../types";
+import type { ConsensusConfig } from "../types.js";
 
 const consensusConfig: ConsensusConfig = {
   appId: 1134695678,

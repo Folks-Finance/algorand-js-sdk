@@ -1,9 +1,9 @@
-import { maximum, minimum } from "../../math-lib";
-import { convertAlgoToXAlgoWhenDelay } from "../formulae";
+import { maximum, minimum } from "../../math-lib.js";
+import { convertAlgoToXAlgoWhenDelay } from "../formulae.js";
 
-import { FIXED_CAPACITY_BUFFER, MAX_APPL_CALLS } from "./constants";
+import { FIXED_CAPACITY_BUFFER, MAX_APPL_CALLS } from "./constants.js";
 
-import type { ProposerAllocations, ConsensusState } from "../types";
+import type { ProposerAllocations, ConsensusState } from "../types.js";
 
 const greedyStakeAllocationStrategy = (
   consensusState: ConsensusState,

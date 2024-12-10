@@ -6,8 +6,8 @@ import {
   prepareFlashLoanEnd,
   TestnetPools,
   TestnetReserveAddress,
-} from "../../src";
-import { algodClient, sender } from "../config";
+} from "../../src/index.js";
+import { algodClient, sender } from "../config.js";
 
 import type { Transaction } from "algosdk";
 

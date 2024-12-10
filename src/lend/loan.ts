@@ -7,7 +7,7 @@ import {
   OnApplicationComplete,
 } from "algosdk";
 
-import { divScale, minimum, mulScale, ONE_10_DP, ONE_4_DP } from "../math-lib";
+import { divScale, minimum, mulScale, ONE_10_DP, ONE_4_DP } from "../math-lib.js";
 import {
   addEscrowNoteTransaction,
   fromIntToByteHex,
@@ -17,13 +17,13 @@ import {
   removeEscrowNoteTransaction,
   signer,
   transferAlgoOrAsset,
-} from "../utils";
+} from "../utils.js";
 
-import { loanABIContract, poolABIContract } from "./abi-contracts";
-import { retrievePoolManagerInfo } from "./deposit";
-import { calcBorrowUtilisationRatio, calcDepositReturn, calcFlashLoanRepayment } from "./formulae";
-import { getOraclePrices, prepareRefreshPricesInOracleAdapter } from "./oracle";
-import { getEscrows, loanLocalState, userLoanInfo } from "./utils";
+import { loanABIContract, poolABIContract } from "./abi-contracts/index.js";
+import { retrievePoolManagerInfo } from "./deposit.js";
+import { calcBorrowUtilisationRatio, calcDepositReturn, calcFlashLoanRepayment } from "./formulae.js";
+import { getOraclePrices, prepareRefreshPricesInOracleAdapter } from "./oracle.js";
+import { getEscrows, loanLocalState, userLoanInfo } from "./utils.js";
 
 import type {
   LoanInfo,
@@ -36,7 +36,7 @@ import type {
   PoolManagerInfo,
   ReserveAddress,
   UserLoanInfo,
-} from "./types";
+} from "./types.js";
 import type { Account, Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 
 /**
