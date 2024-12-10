@@ -4,22 +4,46 @@ The official JavaScript SDK for the Algorand Folks Finance protocol
 
 ## Installation
 
-Using [Node.js](https://nodejs.org/en/download/):
+### Package manager
+
+Using npm:
 
 ```bash
 npm install @folks-finance/algorand-sdk
 ```
 
-## Documentation
-
-Documentation for this SDK is available at <https://folks-finance.github.io/algorand-js-sdk/>.
-
-## Running examples
-
-Portions of the codebase are written in TypeScript, so running examples requires ts-node, an npm package that runs TypeScript files directly. To make this easier for the user, we've included an example alias for ts-node in the project's package.json scripts:
+Using yarn:
 
 ```bash
-npm run example examples/v2/liquidate.ts
+yarn add @folks-finance/algorand-sdk
 ```
 
-Make sure to set your desired configuration in `examples/config.ts` first.
+Using pnpm:
+
+```bash
+pnpm add @folks-finance/algorand-sdk
+```
+
+Using bun:
+
+```bash
+bun add @folks-finance/algorand-sdk
+```
+
+No extra setup is required if you're just using the sdk as a dependency in your project.
+
+## Documentation
+
+Documentation is generated with TypeDoc and available at:  
+<https://folks-finance.github.io/algorand-js-sdk/>
+
+## Running Examples (For Contributors)
+
+If you've forked or cloned this repository, you can run the included examples:
+
+1. Update `examples/config.ts` with your configuration.
+2. Run an example, for example:
+
+```bash
+pnpm example examples/v2/liquidate.ts
+```
