@@ -41,8 +41,7 @@ No extra setup is required if you're just using the sdk as a dependency in your 
 
 ## Documentation
 
-Documentation is generated with TypeDoc and available at:  
-<https://folks-finance.github.io/algorand-js-sdk/>
+Documentation is generated with TypeDoc and available at <https://folks-finance.github.io/algorand-js-sdk/>.
 
 ## Running Examples (For Contributors)
 
