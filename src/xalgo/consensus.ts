@@ -234,7 +234,7 @@ function prepareDelayedStakeTransactions(
   consensusState: ConsensusState,
   senderAddr: string,
   amount: number | bigint,
-  nonce: Uint8Array[],
+  nonce: Uint8Array,
   params: SuggestedParams,
   includeBoxMinBalancePayment = true,
   note?: Uint8Array,
