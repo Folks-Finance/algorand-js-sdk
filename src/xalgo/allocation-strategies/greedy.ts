@@ -10,7 +10,7 @@ const greedyStakeAllocationStrategy = (
   amount: number | bigint,
 ): ProposerAllocations => {
   const { proposersBalances, maxProposerBalance } = consensusState;
-  const allocation = new Array<bigint>(proposersBalances.length);
+  const allocation = new Array<bigint>(proposersBalances.length).fill(BigInt(0));
 
   // sort in ascending order
   const indexed = proposersBalances.map((proposer, index) => ({ ...proposer, index }));
@@ -42,7 +42,7 @@ const greedyUnstakeAllocationStrategy = (
   amount: number | bigint,
 ): ProposerAllocations => {
   const { proposersBalances, minProposerBalance } = consensusState;
-  const allocation = new Array<bigint>(proposersBalances.length);
+  const allocation = new Array<bigint>(proposersBalances.length).fill(BigInt(0));
 
   // sort in descending order
   const indexed = proposersBalances.map((proposer, index) => ({ ...proposer, index }));
