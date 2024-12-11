@@ -1,5 +1,3 @@
-import { randomBytes } from "crypto";
-
 import {
   AtomicTransactionComposer,
   decodeAddress,
@@ -225,6 +223,7 @@ function prepareImmediateStakeTransactions(
  * @param consensusState - current state of the consensus application
  * @param senderAddr - account address for the sender
  * @param amount - amount of ALGO to send
+ * @param nonce - used to generate the delayed mint box (must be two bytes in length)
  * @param params - suggested params for the transactions with the fees overwritten
  * @param includeBoxMinBalancePayment - whether to include ALGO payment to app for box min balance
  * @param note - optional note to distinguish who is the minter (must pass to be eligible for revenue share)
@@ -235,11 +234,15 @@ function prepareDelayedStakeTransactions(
   consensusState: ConsensusState,
   senderAddr: string,
   amount: number | bigint,
+  nonce: Uint8Array[],
   params: SuggestedParams,
   includeBoxMinBalancePayment = true,
   note?: Uint8Array,
 ): Transaction[] {
   const { appId } = consensusConfig;
+
+  if (nonce.length !== 2) throw Error(`Nonce must be two bytes`);
+  // we rely on caller to check nonce is not already in use for sender address
 
   const sendAlgo = {
     txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(appId), amount, params),
@@ -248,7 +251,6 @@ function prepareDelayedStakeTransactions(
   const fee = 1000 * (1 + consensusState.proposersBalances.length);
 
   const atc = new AtomicTransactionComposer();
-  const nonce = randomBytes(2); // TODO: safeguard against possible clash?
   const boxName = Uint8Array.from([...enc.encode("dm"), ...decodeAddress(senderAddr).publicKey, ...nonce]);
   atc.addMethodCall({
     sender: senderAddr,
