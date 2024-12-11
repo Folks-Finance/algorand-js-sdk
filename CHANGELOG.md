@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.0.2
+
+### Patch Changes
+
+- [#57](https://github.com/Folks-Finance/algorand-js-sdk/pull/57) [`87a3cf0`](https://github.com/Folks-Finance/algorand-js-sdk/commit/87a3cf0baad5e96bb40ac374b2b2a2efd461e095) Thanks [@stefanofa](https://github.com/stefanofa)! - Fixed unstake transaction bug by initializing arrays with BigInt(0)s to prevent undefined elements during iteration.
+
 ## 0.0.1
 
 ### Patch Changes
