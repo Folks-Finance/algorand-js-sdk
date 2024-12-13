@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.0.3
+
+### Patch Changes
+
+- [#59](https://github.com/Folks-Finance/algorand-js-sdk/pull/59) [`b094b00`](https://github.com/Folks-Finance/algorand-js-sdk/commit/b094b00dd429fd06aba4bd1055adc8b4e811005b) Thanks [@gidonkatten](https://github.com/gidonkatten)! - update testnet oracle and add xalgo pool to testnet
+
 ## 0.0.2
 
 ### Patch Changes
