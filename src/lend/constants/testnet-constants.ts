@@ -6,7 +6,7 @@ const TestnetPoolManagerAppId = 147157634;
 
 const TestnetDepositsAppId = 147157692;
 
-type TestnetPoolKey = "ALGO" | "gALGO" | "USDC" | "USDt" | "goBTC" | "goETH";
+type TestnetPoolKey = "ALGO" | "gALGO" | "xALGO" | "USDC" | "USDt" | "goBTC" | "goETH";
 const TestnetPools: Record<TestnetPoolKey, Pool> = {
   ALGO: {
     appId: 147169673,
@@ -32,6 +32,18 @@ const TestnetPools: Record<TestnetPoolKey, Pool> = {
     loans: {
       147173131: BigInt(5),
       168153622: BigInt(1),
+    },
+  },
+  xALGO: {
+    appId: 168152517,
+    assetId: 730430700,
+    fAssetId: 730786397,
+    frAssetId: 730786398,
+    assetDecimals: 6,
+    poolManagerIndex: 6,
+    loans: {
+      147173131: BigInt(6),
+      168153622: BigInt(2),
     },
   },
   USDC: {
@@ -99,7 +111,7 @@ const TestnetLoans: Partial<Record<LoanType, number>> = {
 const TestnetReserveAddress: ReserveAddress = "KLF3MEIIHMTA7YHNPLBDVHLN2MVC27X5M7ULTDZLMEX5XO5XCUP7HGBHMQ";
 
 const TestnetOracle: Oracle = {
-  oracle0AppId: 124087437,
+  oracle0AppId: 159512493,
   oracleAdapterAppId: 147153711,
   decimals: 14,
 };
