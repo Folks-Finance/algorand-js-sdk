@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.0.4
+
+### Patch Changes
+
+- [#61](https://github.com/Folks-Finance/algorand-js-sdk/pull/61) [`c149f70`](https://github.com/Folks-Finance/algorand-js-sdk/commit/c149f700b352631ac2c6ecf693a747189607afed) Thanks [@gidonkatten](https://github.com/gidonkatten)! - fix testnet xalgo pool app id
+
 ## 0.0.3
 
 ### Patch Changes
