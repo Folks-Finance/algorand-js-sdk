@@ -35,7 +35,7 @@ const TestnetPools: Record<TestnetPoolKey, Pool> = {
     },
   },
   xALGO: {
-    appId: 168152517,
+    appId: 730786369,
     assetId: 730430700,
     fAssetId: 730786397,
     frAssetId: 730786398,
