@@ -226,7 +226,7 @@ function prepareImmediateStakeTransactions(
 
 /**
  *
- * Returns a group transaction to stake ALGO and get xALGO immediately.
+ * Returns a group transaction to stake ALGO and deposit the xALGO received.
  *
  * @param consensusConfig - consensus application and xALGO config
  * @param consensusState - current state of the consensus application
