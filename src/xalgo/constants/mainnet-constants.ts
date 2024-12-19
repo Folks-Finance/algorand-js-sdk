@@ -1,8 +1,9 @@
 import type { ConsensusConfig } from "../types";
 
 const MainnetConsensusConfig: ConsensusConfig = {
-  appId: 1134695678,
+  consensusAppId: 1134695678,
   xAlgoId: 1134696561,
+  stakeAndDepositAppId: 0,
 };
 
 export { MainnetConsensusConfig };

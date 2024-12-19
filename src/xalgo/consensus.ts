@@ -18,9 +18,10 @@ import {
   transferAlgoOrAsset,
 } from "../utils";
 
-import { xAlgoABIContract } from "./abi-contracts";
+import { stakeAndDepositABIContract, xAlgoABIContract } from "./abi-contracts";
 
 import type { ConsensusConfig, ConsensusState } from "./types";
+import type { Pool } from "../lend";
 import type { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 /**
@@ -32,9 +33,11 @@ import type { Algodv2, SuggestedParams, Transaction } from "algosdk";
  * @returns ConsensusState current state of the consensus application
  */
 async function getConsensusState(algodClient: Algodv2, consensusConfig: ConsensusConfig): Promise<ConsensusState> {
+  const { consensusAppId } = consensusConfig;
+
   const [{ globalState: state }, { round, value: boxValue }, params] = await Promise.all([
-    getApplicationGlobalState(algodClient, consensusConfig.appId),
-    await getApplicationBox(algodClient, consensusConfig.appId, enc.encode("pr")),
+    getApplicationGlobalState(algodClient, consensusAppId),
+    await getApplicationBox(algodClient, consensusAppId, enc.encode("pr")),
     await algodClient.getTransactionParams().do(),
   ]);
   if (state === undefined) throw Error("Could not find xAlgo application");
@@ -44,7 +47,7 @@ async function getConsensusState(algodClient: Algodv2, consensusConfig: Consensu
   atc.addMethodCall({
     sender: "Q5Q5FC5PTYQIUX5PGNTEW22UJHJHVVUEMMWV2LSG6MGT33YQ54ST7FEIGA",
     signer: makeEmptyTransactionSigner(),
-    appID: consensusConfig.appId,
+    appID: consensusAppId,
     method: getMethodByName(xAlgoABIContract.methods, "get_xalgo_rate"),
     methodArgs: [],
     suggestedParams: params,
@@ -105,7 +108,7 @@ function prepareDummyTransaction(
   atc.addMethodCall({
     sender: senderAddr,
     signer,
-    appID: consensusConfig.appId,
+    appID: consensusConfig.consensusAppId,
     method: getMethodByName(xAlgoABIContract.methods, "dummy"),
     methodArgs: [],
     suggestedParams: { ...params, flatFee: true, fee: 1000 },
@@ -125,7 +128,7 @@ function getTxnsAfterResourceAllocation(
   senderAddr: string,
   params: SuggestedParams,
 ): Transaction[] {
-  const { appId, xAlgoId } = consensusConfig;
+  const { consensusAppId, xAlgoId } = consensusConfig;
 
   // make copy of txns
   const txns = txnsToAllocateTo.slice();
@@ -133,7 +136,7 @@ function getTxnsAfterResourceAllocation(
 
   // add xALGO asset and proposers box
   txns[appCallTxnIndex].appForeignAssets = [xAlgoId];
-  const box = { appIndex: appId, name: enc.encode("pr") };
+  const box = { appIndex: consensusAppId, name: enc.encode("pr") };
   const { boxes } = txns[appCallTxnIndex];
   if (boxes) {
     boxes.push(box);
@@ -190,19 +193,23 @@ function prepareImmediateStakeTransactions(
   params: SuggestedParams,
   note?: Uint8Array,
 ): Transaction[] {
-  const { appId } = consensusConfig;
+  const { consensusAppId } = consensusConfig;
 
   const sendAlgo = {
-    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(appId), amount, params),
+    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId), amount, {
+      ...params,
+      flatFee: true,
+      fee: 0,
+    }),
     signer,
   };
-  const fee = 1000 * (2 + consensusState.proposersBalances.length);
+  const fee = 1000 * (3 + consensusState.proposersBalances.length);
 
   const atc = new AtomicTransactionComposer();
   atc.addMethodCall({
     sender: senderAddr,
     signer,
-    appID: appId,
+    appID: consensusAppId,
     method: getMethodByName(xAlgoABIContract.methods, "immediate_mint"),
     methodArgs: [sendAlgo, receiverAddr, minReceivedAmount],
     suggestedParams: { ...params, flatFee: true, fee },
@@ -215,6 +222,84 @@ function prepareImmediateStakeTransactions(
     return txn;
   });
   return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [receiverAddr], senderAddr, params);
+}
+
+/**
+ *
+ * Returns a group transaction to stake ALGO and get xALGO immediately.
+ *
+ * @param consensusConfig - consensus application and xALGO config
+ * @param consensusState - current state of the consensus application
+ * @param pool - pool application to deposit into
+ * @param poolManagerAppId - pool manager application
+ * @param senderAddr - account address for the sender
+ * @param receiverAddr - account address to receive the deposit (typically the user's deposit escrow or loan escrow)
+ * @param amount - amount of ALGO to send
+ * @param minXAlgoReceivedAmount - min amount of xALGO expected to receive
+ * @param params - suggested params for the transactions with the fees overwritten
+ * @param note - optional note to distinguish who is the minter (must pass to be eligible for revenue share)
+ * @returns Transaction[] stake transactions
+ */
+function prepareImmediateStakeAndDepositTransactions(
+  consensusConfig: ConsensusConfig,
+  consensusState: ConsensusState,
+  pool: Pool,
+  poolManagerAppId: number,
+  senderAddr: string,
+  receiverAddr: string,
+  amount: number | bigint,
+  minXAlgoReceivedAmount: number | bigint,
+  params: SuggestedParams,
+  note?: Uint8Array,
+): Transaction[] {
+  const { consensusAppId, xAlgoId, stakeAndDepositAppId } = consensusConfig;
+  const { appId: poolAppId, assetId, fAssetId } = pool;
+  if (assetId !== xAlgoId) throw Error("xAlgo pool not passed");
+
+  const sendAlgo = {
+    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(stakeAndDepositAppId), amount, {
+      ...params,
+      flatFee: true,
+      fee: 0,
+    }),
+    signer,
+  };
+  const fee = 1000 * (9 + consensusState.proposersBalances.length);
+
+  const atc = new AtomicTransactionComposer();
+  atc.addMethodCall({
+    sender: senderAddr,
+    signer,
+    appID: stakeAndDepositAppId,
+    method: getMethodByName(stakeAndDepositABIContract.methods, "stake_and_deposit"),
+    methodArgs: [
+      sendAlgo,
+      consensusAppId,
+      poolAppId,
+      poolManagerAppId,
+      assetId,
+      fAssetId,
+      receiverAddr,
+      minXAlgoReceivedAmount,
+    ],
+    suggestedParams: { ...params, flatFee: true, fee },
+    note,
+  });
+
+  const txns = atc.buildGroup().map(({ txn }) => {
+    txn.group = undefined;
+    return txn;
+  });
+
+  // allocate resources, add accounts in groups of 4
+  const MAX_FOREIGN_ACCOUNT_PER_TXN = 4;
+  const accounts = consensusState.proposersBalances.map(({ address }) => decodeAddress(address));
+  for (let i = 0; i < accounts.length; i += MAX_FOREIGN_ACCOUNT_PER_TXN) {
+    txns.unshift(prepareDummyTransaction(consensusConfig, senderAddr, params));
+    txns[0].appAccounts = accounts.slice(i, i + 4);
+  }
+  txns[0].boxes = [{ appIndex: consensusAppId, name: enc.encode("pr") }];
+  return txns;
 }
 
 /**
@@ -243,26 +328,30 @@ function prepareDelayedStakeTransactions(
   includeBoxMinBalancePayment = true,
   note?: Uint8Array,
 ): Transaction[] {
-  const { appId } = consensusConfig;
+  const { consensusAppId } = consensusConfig;
 
   if (nonce.length !== 2) throw Error(`Nonce must be two bytes`);
   // we rely on caller to check nonce is not already in use for sender address
 
   const sendAlgo = {
-    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(appId), amount, params),
+    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId), amount, {
+      ...params,
+      flatFee: true,
+      fee: 0,
+    }),
     signer,
   };
-  const fee = 1000 * (1 + consensusState.proposersBalances.length);
+  const fee = 1000 * (2 + consensusState.proposersBalances.length);
 
   const atc = new AtomicTransactionComposer();
   const boxName = Uint8Array.from([...enc.encode("dm"), ...decodeAddress(senderAddr).publicKey, ...nonce]);
   atc.addMethodCall({
     sender: senderAddr,
     signer,
-    appID: appId,
+    appID: consensusAppId,
     method: getMethodByName(xAlgoABIContract.methods, "delayed_mint"),
     methodArgs: [sendAlgo, receiverAddr, nonce],
-    boxes: [{ appIndex: appId, name: boxName }],
+    boxes: [{ appIndex: consensusAppId, name: boxName }],
     suggestedParams: { ...params, flatFee: true, fee },
     note,
   });
@@ -277,7 +366,7 @@ function prepareDelayedStakeTransactions(
   // add box min balance payment if specified
   if (includeBoxMinBalancePayment) {
     const minBalance = BigInt(36100);
-    txns.unshift(transferAlgoOrAsset(0, senderAddr, getApplicationAddress(appId), minBalance, params));
+    txns.unshift(transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId), minBalance, params));
   }
   return txns;
 }
@@ -304,17 +393,17 @@ function prepareClaimDelayedStakeTransactions(
   nonce: Uint8Array,
   params: SuggestedParams,
 ): Transaction[] {
-  const { appId } = consensusConfig;
+  const { consensusAppId } = consensusConfig;
 
   const atc = new AtomicTransactionComposer();
   const boxName = Uint8Array.from([...enc.encode("dm"), ...decodeAddress(minterAddr).publicKey, ...nonce]);
   atc.addMethodCall({
     sender: senderAddr,
     signer,
-    appID: appId,
+    appID: consensusAppId,
     method: getMethodByName(xAlgoABIContract.methods, "claim_delayed_mint"),
     methodArgs: [minterAddr, nonce],
-    boxes: [{ appIndex: appId, name: boxName }],
+    boxes: [{ appIndex: consensusAppId, name: boxName }],
     suggestedParams: { ...params, flatFee: true, fee: 3000 },
   });
 
@@ -350,19 +439,23 @@ function prepareUnstakeTransactions(
   params: SuggestedParams,
   note?: Uint8Array,
 ): Transaction[] {
-  const { appId, xAlgoId } = consensusConfig;
+  const { consensusAppId, xAlgoId } = consensusConfig;
 
   const sendXAlgo = {
-    txn: transferAlgoOrAsset(xAlgoId, senderAddr, getApplicationAddress(appId), amount, params),
+    txn: transferAlgoOrAsset(xAlgoId, senderAddr, getApplicationAddress(consensusAppId), amount, {
+      ...params,
+      flatFee: true,
+      fee: 0,
+    }),
     signer,
   };
-  const fee = 1000 * (2 + consensusState.proposersBalances.length);
+  const fee = 1000 * (3 + consensusState.proposersBalances.length);
 
   const atc = new AtomicTransactionComposer();
   atc.addMethodCall({
     sender: senderAddr,
     signer,
-    appID: appId,
+    appID: consensusAppId,
     method: getMethodByName(xAlgoABIContract.methods, "burn"),
     methodArgs: [sendXAlgo, receiverAddr, minReceivedAmount],
     suggestedParams: { ...params, flatFee: true, fee },
@@ -381,6 +474,7 @@ export {
   getConsensusState,
   prepareDummyTransaction,
   prepareImmediateStakeTransactions,
+  prepareImmediateStakeAndDepositTransactions,
   prepareDelayedStakeTransactions,
   prepareClaimDelayedStakeTransactions,
   prepareUnstakeTransactions,

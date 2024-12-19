@@ -1,6 +1,7 @@
 interface ConsensusConfig {
-  appId: number;
+  consensusAppId: number;
   xAlgoId: number;
+  stakeAndDepositAppId: number;
 }
 
 interface ConsensusState {
