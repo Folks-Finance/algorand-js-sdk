@@ -94,6 +94,11 @@
           "desc": "Send ALGO to the app to mint"
         },
         {
+          "type": "address",
+          "name": "receiver",
+          "desc": "The address to receiver the xALGO at"
+        },
+        {
           "type": "uint64",
           "name": "min_received",
           "desc": "The minimum amount of xALGO to receive in return"
@@ -113,6 +118,11 @@
           "desc": "Send ALGO to the app to mint"
         },
         {
+          "type": "address",
+          "name": "receiver",
+          "desc": "The address to receiver the xALGO at"
+        },
+        {
           "type": "byte[2]",
           "name": "nonce",
           "desc": "The nonce used to create the box to store the delayed mint"
@@ -128,8 +138,8 @@
       "args": [
         {
           "type": "address",
-          "name": "receiver",
-          "desc": "The address the claim the delayed mint for"
+          "name": "minter",
+          "desc": "The address which submitted the delayed mint"
         },
         {
           "type": "byte[2]",
@@ -149,6 +159,11 @@
           "type": "axfer",
           "name": "send_xalgo",
           "desc": "Send xALGO to the app to burn"
+        },
+        {
+          "type": "address",
+          "name": "receiver",
+          "desc": "The address to receiver the ALGO at"
         },
         {
           "type": "uint64",

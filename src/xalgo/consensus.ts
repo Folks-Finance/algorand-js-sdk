@@ -21,7 +21,7 @@ import {
 import { xAlgoABIContract } from "./abi-contracts";
 
 import type { ConsensusConfig, ConsensusState } from "./types";
-import type { Address, Algodv2, SuggestedParams, Transaction } from "algosdk";
+import type { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 /**
  *
@@ -123,7 +123,7 @@ function getTxnsAfterResourceAllocation(
   consensusConfig: ConsensusConfig,
   consensusState: ConsensusState,
   txnsToAllocateTo: Transaction[],
-  additionalAddresses: Address[],
+  additionalAddresses: string[],
   senderAddr: string,
   params: SuggestedParams,
 ): Transaction[] {
@@ -144,8 +144,10 @@ function getTxnsAfterResourceAllocation(
   }
 
   // get all accounts we need to add
-  const accounts: Address[] = additionalAddresses;
-  for (const { address } of consensusState.proposersBalances) accounts.push(decodeAddress(address));
+  const uniqueAddresses: Set<string> = new Set(additionalAddresses);
+  for (const { address } of consensusState.proposersBalances) uniqueAddresses.add(address);
+  uniqueAddresses.delete(senderAddr);
+  const accounts = Array.from(uniqueAddresses).map((address) => decodeAddress(address));
 
   // add accounts in groups of 4
   const MAX_FOREIGN_ACCOUNT_PER_TXN = 4;
@@ -173,6 +175,7 @@ function getTxnsAfterResourceAllocation(
  * @param consensusConfig - consensus application and xALGO config
  * @param consensusState - current state of the consensus application
  * @param senderAddr - account address for the sender
+ * @param receiverAddr - account address to receive the xALGO at (typically the user, user's deposit escrow or loan escrow)
  * @param amount - amount of ALGO to send
  * @param minReceivedAmount - min amount of xALGO expected to receive
  * @param params - suggested params for the transactions with the fees overwritten
@@ -183,6 +186,7 @@ function prepareImmediateStakeTransactions(
   consensusConfig: ConsensusConfig,
   consensusState: ConsensusState,
   senderAddr: string,
+  receiverAddr: string,
   amount: number | bigint,
   minReceivedAmount: number | bigint,
   params: SuggestedParams,
@@ -202,7 +206,7 @@ function prepareImmediateStakeTransactions(
     signer,
     appID: appId,
     method: getMethodByName(xAlgoABIContract.methods, "immediate_mint"),
-    methodArgs: [sendAlgo, minReceivedAmount],
+    methodArgs: [sendAlgo, receiverAddr, minReceivedAmount],
     suggestedParams: { ...params, flatFee: true, fee },
     note,
   });
@@ -212,7 +216,7 @@ function prepareImmediateStakeTransactions(
     txn.group = undefined;
     return txn;
   });
-  return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [], senderAddr, params);
+  return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [receiverAddr], senderAddr, params);
 }
 
 /**
@@ -222,6 +226,7 @@ function prepareImmediateStakeTransactions(
  * @param consensusConfig - consensus application and xALGO config
  * @param consensusState - current state of the consensus application
  * @param senderAddr - account address for the sender
+ * @param receiverAddr - account address to receive the xALGO at (typically the user)
  * @param amount - amount of ALGO to send
  * @param nonce - used to generate the delayed mint box (must be two bytes in length)
  * @param params - suggested params for the transactions with the fees overwritten
@@ -233,6 +238,7 @@ function prepareDelayedStakeTransactions(
   consensusConfig: ConsensusConfig,
   consensusState: ConsensusState,
   senderAddr: string,
+  receiverAddr: string,
   amount: number | bigint,
   nonce: Uint8Array,
   params: SuggestedParams,
@@ -257,7 +263,7 @@ function prepareDelayedStakeTransactions(
     signer,
     appID: appId,
     method: getMethodByName(xAlgoABIContract.methods, "delayed_mint"),
-    methodArgs: [sendAlgo, nonce],
+    methodArgs: [sendAlgo, receiverAddr, nonce],
     boxes: [{ appIndex: appId, name: boxName }],
     suggestedParams: { ...params, flatFee: true, fee },
     note,
@@ -285,7 +291,8 @@ function prepareDelayedStakeTransactions(
  * @param consensusConfig - consensus application and xALGO config
  * @param consensusState - current state of the consensus application
  * @param senderAddr - account address for the sender
- * @param receiverAddr - account address for the receiver
+ * @param minterAddr - account address for the user who submitted the delayed stake
+ * @param receiverAddr - account address for the receiver of the xALGO
  * @param nonce - what was used to generate the delayed mint box
  * @param params - suggested params for the transactions with the fees overwritten
  * @returns Transaction[] stake transactions
@@ -294,6 +301,7 @@ function prepareClaimDelayedStakeTransactions(
   consensusConfig: ConsensusConfig,
   consensusState: ConsensusState,
   senderAddr: string,
+  minterAddr: string,
   receiverAddr: string,
   nonce: Uint8Array,
   params: SuggestedParams,
@@ -301,13 +309,13 @@ function prepareClaimDelayedStakeTransactions(
   const { appId } = consensusConfig;
 
   const atc = new AtomicTransactionComposer();
-  const boxName = Uint8Array.from([...enc.encode("dm"), ...decodeAddress(receiverAddr).publicKey, ...nonce]);
+  const boxName = Uint8Array.from([...enc.encode("dm"), ...decodeAddress(minterAddr).publicKey, ...nonce]);
   atc.addMethodCall({
     sender: senderAddr,
     signer,
     appID: appId,
     method: getMethodByName(xAlgoABIContract.methods, "claim_delayed_mint"),
-    methodArgs: [receiverAddr, nonce],
+    methodArgs: [minterAddr, nonce],
     boxes: [{ appIndex: appId, name: boxName }],
     suggestedParams: { ...params, flatFee: true, fee: 3000 },
   });
@@ -317,14 +325,7 @@ function prepareClaimDelayedStakeTransactions(
     txn.group = undefined;
     return txn;
   });
-  return getTxnsAfterResourceAllocation(
-    consensusConfig,
-    consensusState,
-    txns,
-    [decodeAddress(receiverAddr)],
-    senderAddr,
-    params,
-  );
+  return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [receiverAddr], senderAddr, params);
 }
 
 /**
@@ -334,6 +335,7 @@ function prepareClaimDelayedStakeTransactions(
  * @param consensusConfig - consensus application and xALGO config
  * @param consensusState - current state of the consensus application
  * @param senderAddr - account address for the sender
+ * @param receiverAddr - account address to receive the xALGO at (typically the user)
  * @param amount - amount of xALGO to send
  * @param minReceivedAmount - min amount of ALGO expected to receive
  * @param params - suggested params for the transactions with the fees overwritten
@@ -344,6 +346,7 @@ function prepareUnstakeTransactions(
   consensusConfig: ConsensusConfig,
   consensusState: ConsensusState,
   senderAddr: string,
+  receiverAddr: string,
   amount: number | bigint,
   minReceivedAmount: number | bigint,
   params: SuggestedParams,
@@ -363,7 +366,7 @@ function prepareUnstakeTransactions(
     signer,
     appID: appId,
     method: getMethodByName(xAlgoABIContract.methods, "burn"),
-    methodArgs: [sendXAlgo, minReceivedAmount],
+    methodArgs: [sendXAlgo, receiverAddr, minReceivedAmount],
     suggestedParams: { ...params, flatFee: true, fee },
     note,
   });
@@ -373,7 +376,7 @@ function prepareUnstakeTransactions(
     txn.group = undefined;
     return txn;
   });
-  return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [], senderAddr, params);
+  return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [receiverAddr], senderAddr, params);
 }
 
 export {
