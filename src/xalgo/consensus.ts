@@ -72,9 +72,8 @@ async function getConsensusState(algodClient: Algodv2, consensusConfig: Consensu
   const maxProposerBalance = BigInt(getParsedValueFromState(state, "max_proposer_balance") || 0);
   const fee = BigInt(getParsedValueFromState(state, "fee") || 0);
   const premium = BigInt(getParsedValueFromState(state, "premium") || 0);
+  const lastProposersActiveBalance = BigInt(getParsedValueFromState(state, "last_proposers_active_balance") || 0);
   const totalPendingStake = BigInt(getParsedValueFromState(state, "total_pending_stake") || 0);
-  const totalActiveStake = BigInt(getParsedValueFromState(state, "total_active_stake") || 0);
-  const totalRewards = BigInt(getParsedValueFromState(state, "total_rewards") || 0);
   const totalUnclaimedFees = BigInt(getParsedValueFromState(state, "total_unclaimed_fees") || 0);
   const canImmediateStake = Boolean(getParsedValueFromState(state, "can_immediate_mint"));
   const canDelayStake = Boolean(getParsedValueFromState(state, "can_delay_mint"));
@@ -89,9 +88,8 @@ async function getConsensusState(algodClient: Algodv2, consensusConfig: Consensu
     maxProposerBalance,
     fee,
     premium,
+    lastProposersActiveBalance,
     totalPendingStake,
-    totalActiveStake,
-    totalRewards,
     totalUnclaimedFees,
     canImmediateStake,
     canDelayStake,

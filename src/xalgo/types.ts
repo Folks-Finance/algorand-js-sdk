@@ -16,9 +16,8 @@ interface ConsensusState {
   maxProposerBalance: bigint;
   fee: bigint; // 4 d.p.
   premium: bigint; // 16 d.p.
+  lastProposersActiveBalance: bigint;
   totalPendingStake: bigint;
-  totalActiveStake: bigint;
-  totalRewards: bigint;
   totalUnclaimedFees: bigint;
   canImmediateStake: boolean;
   canDelayStake: boolean;
