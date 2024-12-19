@@ -173,7 +173,7 @@ function getTxnsAfterResourceAllocation(
  * @param consensusConfig - consensus application and xALGO config
  * @param consensusState - current state of the consensus application
  * @param senderAddr - account address for the sender
- * @param receiverAddr - account address to receive the xALGO at (typically the user, user's deposit escrow or loan escrow)
+ * @param receiverAddr - account address to receive the xALGO at (typically the user)
  * @param amount - amount of ALGO to send
  * @param minReceivedAmount - min amount of xALGO expected to receive
  * @param params - suggested params for the transactions with the fees overwritten
