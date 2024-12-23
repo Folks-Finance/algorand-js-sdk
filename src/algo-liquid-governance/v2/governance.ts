@@ -11,12 +11,12 @@ import {
 
 import {
   addEscrowNoteTransaction,
-  CONSENUS_REWARDS_KEY_REG_FEE,
   enc,
   getAccountApplicationLocalState,
   getAccountDetails,
   getApplicationGlobalState,
   getParsedValueFromState,
+  PAYOUTS_GO_ONLINE_FEE,
   signer,
   transferAlgoOrAsset,
 } from "../../utils";
@@ -420,7 +420,7 @@ function prepareRegisterEscrowOnlineTransaction(
   const escrowAddr = getDistributorLogicSig(senderAddr).address();
 
   // check register fee is either 0 ALGO or 0.2 ALGO
-  if (registerFeeAmount !== 0 && registerFeeAmount !== CONSENUS_REWARDS_KEY_REG_FEE)
+  if (registerFeeAmount !== 0 && registerFeeAmount !== PAYOUTS_GO_ONLINE_FEE)
     throw Error("Unexpected register fee amount");
 
   const sendAlgo = {
