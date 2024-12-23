@@ -38,6 +38,8 @@ function unixTime(): number {
   return Math.floor(Date.now() / 1000);
 }
 
+const CONSENUS_REWARDS_KEY_REG_FEE = BigInt(0.2e6);
+
 /**
  * Wraps a call to Algorand client (algod/indexer) and returns global state
  */
@@ -253,6 +255,7 @@ export {
   enc,
   transferAlgoOrAsset,
   signer,
+  CONSENUS_REWARDS_KEY_REG_FEE,
   unixTime,
   getApplicationGlobalState,
   getAccountApplicationLocalState,

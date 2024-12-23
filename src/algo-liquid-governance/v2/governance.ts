@@ -11,6 +11,7 @@ import {
 
 import {
   addEscrowNoteTransaction,
+  CONSENUS_REWARDS_KEY_REG_FEE,
   enc,
   getAccountApplicationLocalState,
   getAccountDetails,
@@ -394,6 +395,7 @@ function prepareClaimPremintTransaction(
  *
  * @param distributor - distributor that has escrow
  * @param senderAddr - account address for the sender
+ * @param registerFeeAmount - the register online transaction fee (to be used for consensus rewards)
  * @param voteKey - vote key
  * @param selectionKey - selection key
  * @param stateProofKey - state proof key
@@ -406,6 +408,7 @@ function prepareClaimPremintTransaction(
 function prepareRegisterEscrowOnlineTransaction(
   distributor: Distributor,
   senderAddr: string,
+  registerFeeAmount: number | bigint,
   voteKey: Buffer,
   selectionKey: Buffer,
   stateProofKey: Buffer,
@@ -416,6 +419,15 @@ function prepareRegisterEscrowOnlineTransaction(
 ): Transaction {
   const escrowAddr = getDistributorLogicSig(senderAddr).address();
 
+  // check register fee is either 0 ALGO or 0.2 ALGO
+  if (registerFeeAmount !== 0 && registerFeeAmount !== CONSENUS_REWARDS_KEY_REG_FEE)
+    throw Error("Unexpected register fee amount");
+
+  const sendAlgo = {
+    txn: transferAlgoOrAsset(0, senderAddr, escrowAddr, registerFeeAmount, { ...params, flatFee: true, fee: 0 }),
+    signer,
+  };
+
   const atc = new AtomicTransactionComposer();
   atc.addMethodCall({
     sender: senderAddr,
@@ -423,6 +435,7 @@ function prepareRegisterEscrowOnlineTransaction(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "register_online"),
     methodArgs: [
+      sendAlgo,
       escrowAddr,
       encodeAddress(voteKey),
       encodeAddress(selectionKey),
@@ -431,7 +444,7 @@ function prepareRegisterEscrowOnlineTransaction(
       voteLastRound,
       voteKeyDilution,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: 3000 },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -534,7 +547,8 @@ function prepareRemoveLiquidGovernanceEscrowTransactions(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "remove_escrow"),
     methodArgs: [escrowAddr],
-    suggestedParams: { ...params, flatFee: true, fee: 4000 },
+    appAccounts: [ownerAddr],
+    suggestedParams: { ...params, flatFee: true, fee: 5000 },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
