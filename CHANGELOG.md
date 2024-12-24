@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.0.6
+
+### Patch Changes
+
+- [#67](https://github.com/Folks-Finance/algorand-js-sdk/pull/67) [`889fc32`](https://github.com/Folks-Finance/algorand-js-sdk/commit/889fc3231d327ed851607c1afed355b5caea54ac) Thanks [@gidonkatten](https://github.com/gidonkatten)! - fix register online abi for new distributor
+
 ## 0.0.5
 
 ### Patch Changes
