@@ -391,7 +391,7 @@ function prepareClaimPremintTransaction(
 
 /**
  *
- * Returns a transaction to register escrow online.
+ * Returns a group transaction to register an escrow online.
  *
  * @param distributor - distributor that has escrow
  * @param senderAddr - account address for the sender
@@ -405,7 +405,7 @@ function prepareClaimPremintTransaction(
  * @param params - suggested params for the transactions with the fees overwritten
  * @returns Transaction register online transaction
  */
-function prepareRegisterEscrowOnlineTransaction(
+function prepareRegisterEscrowOnlineTransactions(
   distributor: Distributor,
   senderAddr: string,
   registerFeeAmount: number | bigint,
@@ -416,7 +416,7 @@ function prepareRegisterEscrowOnlineTransaction(
   voteLastRound: number | bigint,
   voteKeyDilution: number | bigint,
   params: SuggestedParams,
-): Transaction {
+): Transaction[] {
   const escrowAddr = getDistributorLogicSig(senderAddr).address();
 
   // check register fee is either 0 ALGO or 0.2 ALGO
@@ -446,16 +446,15 @@ function prepareRegisterEscrowOnlineTransaction(
     ],
     suggestedParams: { ...params, flatFee: true, fee: 3000 },
   });
-  const txns = atc.buildGroup().map(({ txn }) => {
+  return atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
     return txn;
   });
-  return txns[0];
 }
 
 /**
  *
- * Returns a transaction to register escrow offline.
+ * Returns a transaction to register an escrow offline.
  *
  * @param distributor - distributor that has escrow
  * @param senderAddr - account address for the sender
@@ -622,7 +621,7 @@ export {
   prepareUnmintPremintTransaction,
   prepareUnmintTransactions,
   prepareClaimPremintTransaction,
-  prepareRegisterEscrowOnlineTransaction,
+  prepareRegisterEscrowOnlineTransactions,
   prepareRegisterEscrowOfflineTransaction,
   prepareCommitOrVoteTransaction,
   prepareRemoveLiquidGovernanceEscrowTransactions,
