@@ -14,6 +14,7 @@ import {
   getApplicationGlobalState,
   getParsedValueFromState,
   parseUint64s,
+  PAYOUTS_GO_ONLINE_FEE,
   signer,
   transferAlgoOrAsset,
 } from "../utils";
@@ -167,6 +168,12 @@ function getTxnsAfterResourceAllocation(
   }
 
   return txns;
+}
+
+function getProposerIndex(consensusState: ConsensusState, proposerAddr: string): number {
+  const index = consensusState.proposersBalances.findIndex(({ address }) => address === proposerAddr);
+  if (index === -1) throw Error(`Could not find proposer ${proposerAddr}`);
+  return index;
 }
 
 /**
@@ -470,6 +477,170 @@ function prepareUnstakeTransactions(
   return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [receiverAddr], senderAddr, params);
 }
 
+/**
+ *
+ * Only for third-party node runners.
+ * Returns a transaction to set the proposer admin which can register online/offline.
+ *
+ * @param consensusConfig - consensus application and xALGO config
+ * @param consensusState - current state of the consensus application
+ * @param senderAddr - account address for the sender
+ * @param proposerAddr - account address of the proposer
+ * @param newProposerAdminAddr - admin which you want to set
+ * @param params - suggested params for the transactions with the fees overwritten
+ * @returns Transaction set proposer admin transaction
+ */
+function prepareSetProposerAdminTransaction(
+  consensusConfig: ConsensusConfig,
+  consensusState: ConsensusState,
+  senderAddr: string,
+  proposerAddr: string,
+  newProposerAdminAddr: string,
+  params: SuggestedParams,
+): Transaction {
+  const { consensusAppId } = consensusConfig;
+  const proposerIndex = getProposerIndex(consensusState, proposerAddr);
+
+  const atc = new AtomicTransactionComposer();
+  atc.addMethodCall({
+    sender: senderAddr,
+    signer,
+    appID: consensusAppId,
+    method: getMethodByName(xAlgoABIContract.methods, "set_proposer_admin"),
+    methodArgs: [proposerIndex, newProposerAdminAddr],
+    boxes: [
+      { appIndex: consensusAppId, name: enc.encode("pr") },
+      {
+        appIndex: consensusAppId,
+        name: Uint8Array.from([...enc.encode("ap"), ...decodeAddress(proposerAddr).publicKey]),
+      },
+    ],
+    suggestedParams: params,
+  });
+  const txns = atc.buildGroup().map(({ txn }) => {
+    txn.group = undefined;
+    return txn;
+  });
+  return txns[0];
+}
+
+/**
+ *
+ * Only for third-party node runners.
+ * Returns a transaction to register a proposer online.
+ *
+ * @param consensusConfig - consensus application and xALGO config
+ * @param consensusState - current state of the consensus application
+ * @param senderAddr - account address for the sender
+ * @param proposerAddr - account address of the proposer
+ * @param voteKey - vote key
+ * @param selectionKey - selection key
+ * @param stateProofKey - state proof key
+ * @param voteFirstRound - vote first round
+ * @param voteLastRound - vote last round
+ * @param voteKeyDilution - vote key dilution
+ * @param params - suggested params for the transactions with the fees overwritten
+ * @returns Transaction register online transaction
+ */
+function prepareRegisterPrpposerOnlineTransactions(
+  consensusConfig: ConsensusConfig,
+  consensusState: ConsensusState,
+  senderAddr: string,
+  proposerAddr: string,
+  voteKey: Buffer,
+  selectionKey: Buffer,
+  stateProofKey: Buffer,
+  voteFirstRound: number | bigint,
+  voteLastRound: number | bigint,
+  voteKeyDilution: number | bigint,
+  params: SuggestedParams,
+): Transaction[] {
+  const { consensusAppId } = consensusConfig;
+  const proposerIndex = getProposerIndex(consensusState, proposerAddr);
+
+  const sendAlgo = {
+    txn: transferAlgoOrAsset(0, senderAddr, proposerAddr, PAYOUTS_GO_ONLINE_FEE, { ...params, flatFee: true, fee: 0 }),
+    signer,
+  };
+
+  const atc = new AtomicTransactionComposer();
+  atc.addMethodCall({
+    sender: senderAddr,
+    signer,
+    appID: consensusAppId,
+    method: getMethodByName(xAlgoABIContract.methods, "register_online"),
+    methodArgs: [
+      sendAlgo,
+      proposerIndex,
+      encodeAddress(voteKey),
+      encodeAddress(selectionKey),
+      stateProofKey,
+      voteFirstRound,
+      voteLastRound,
+      voteKeyDilution,
+    ],
+    appAccounts: [proposerAddr],
+    boxes: [
+      { appIndex: consensusAppId, name: enc.encode("pr") },
+      {
+        appIndex: consensusAppId,
+        name: Uint8Array.from([...enc.encode("ap"), ...decodeAddress(proposerAddr).publicKey]),
+      },
+    ],
+    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+  });
+  return atc.buildGroup().map(({ txn }) => {
+    txn.group = undefined;
+    return txn;
+  });
+}
+
+/**
+ *
+ * Only for third-party node runners.
+ * Returns a transaction to register a proposer offline.
+ *
+ * @param consensusConfig - consensus application and xALGO config
+ * @param consensusState - current state of the consensus application
+ * @param senderAddr - account address for the sender
+ * @param proposerAddr - account address of the proposer
+ * @param params - suggested params for the transactions with the fees overwritten
+ * @returns Transaction register offline transaction
+ */
+function prepareRegisterProposerOfflineTransaction(
+  consensusConfig: ConsensusConfig,
+  consensusState: ConsensusState,
+  senderAddr: string,
+  proposerAddr: string,
+  params: SuggestedParams,
+): Transaction {
+  const { consensusAppId } = consensusConfig;
+  const proposerIndex = getProposerIndex(consensusState, proposerAddr);
+
+  const atc = new AtomicTransactionComposer();
+  atc.addMethodCall({
+    sender: senderAddr,
+    signer,
+    appID: consensusAppId,
+    method: getMethodByName(xAlgoABIContract.methods, "register_offline"),
+    methodArgs: [proposerIndex],
+    appAccounts: [proposerAddr],
+    boxes: [
+      { appIndex: consensusAppId, name: enc.encode("pr") },
+      {
+        appIndex: consensusAppId,
+        name: Uint8Array.from([...enc.encode("ap"), ...decodeAddress(proposerAddr).publicKey]),
+      },
+    ],
+    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+  });
+  const txns = atc.buildGroup().map(({ txn }) => {
+    txn.group = undefined;
+    return txn;
+  });
+  return txns[0];
+}
+
 export {
   getConsensusState,
   prepareDummyTransaction,
@@ -478,4 +649,7 @@ export {
   prepareDelayedStakeTransactions,
   prepareClaimDelayedStakeTransactions,
   prepareUnstakeTransactions,
+  prepareSetProposerAdminTransaction,
+  prepareRegisterPrpposerOnlineTransactions,
+  prepareRegisterProposerOfflineTransaction,
 };
