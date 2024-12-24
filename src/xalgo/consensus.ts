@@ -515,7 +515,7 @@ function prepareSetProposerAdminTransaction(
         name: Uint8Array.from([...enc.encode("ap"), ...decodeAddress(proposerAddr).publicKey]),
       },
     ],
-    suggestedParams: params,
+    suggestedParams: { ...params, flatFee: true, fee: 1000 },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -542,7 +542,7 @@ function prepareSetProposerAdminTransaction(
  * @param params - suggested params for the transactions with the fees overwritten
  * @returns Transaction register online transaction
  */
-function prepareRegisterPrpposerOnlineTransactions(
+function prepareRegisterProposerOnlineTransactions(
   consensusConfig: ConsensusConfig,
   consensusState: ConsensusState,
   senderAddr: string,
@@ -650,6 +650,6 @@ export {
   prepareClaimDelayedStakeTransactions,
   prepareUnstakeTransactions,
   prepareSetProposerAdminTransaction,
-  prepareRegisterPrpposerOnlineTransactions,
+  prepareRegisterProposerOnlineTransactions,
   prepareRegisterProposerOfflineTransaction,
 };
