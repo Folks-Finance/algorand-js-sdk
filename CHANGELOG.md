@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.0.5
+
+### Patch Changes
+
+- [#64](https://github.com/Folks-Finance/algorand-js-sdk/pull/64) [`2f0e705`](https://github.com/Folks-Finance/algorand-js-sdk/commit/2f0e705f71e74eb1ba983d6059ae7e94459b464c) Thanks [@gidonkatten](https://github.com/gidonkatten)! - new galgo distributor
+
 ## 0.0.4
 
 ### Patch Changes
