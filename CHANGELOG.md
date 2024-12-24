@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.0.7
+
+### Patch Changes
+
+- [#69](https://github.com/Folks-Finance/algorand-js-sdk/pull/69) [`30119c7`](https://github.com/Folks-Finance/algorand-js-sdk/commit/30119c7857855fcfcacb52e2afa36c8bc85af442) Thanks [@gidonkatten](https://github.com/gidonkatten)! - return group transaction for register online
+
 ## 0.0.6
 
 ### Patch Changes
