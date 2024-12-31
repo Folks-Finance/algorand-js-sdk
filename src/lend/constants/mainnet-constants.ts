@@ -12,6 +12,7 @@ const MainnetDepositStakingAppId = 1093729103;
 type MainnetPoolKey =
   | "ALGO"
   | "gALGO"
+  | "xALGO"
   | "USDC"
   | "USDt"
   | "GARD"
@@ -52,6 +53,18 @@ const MainnetPools: Record<MainnetPoolKey, Pool> = {
     loans: {
       971388781: BigInt(1),
       971389489: BigInt(1),
+    },
+  },
+  xALGO: {
+    appId: 2611131944,
+    assetId: 1134696561,
+    fAssetId: 2611138444,
+    frAssetId: 2611138445,
+    assetDecimals: 6,
+    poolManagerIndex: 17,
+    loans: {
+      971388781: BigInt(17),
+      971389489: BigInt(2),
     },
   },
   USDC: {
