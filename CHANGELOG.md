@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.1.1
+
+### Patch Changes
+
+- [#72](https://github.com/Folks-Finance/algorand-js-sdk/pull/72) [`a724ede`](https://github.com/Folks-Finance/algorand-js-sdk/commit/a724edee55b4d9337ff7713b1b2a9dfc0b584543) Thanks [@gidonkatten](https://github.com/gidonkatten)! - new xalgo usdc lending pools
+
 ## 0.1.0
 
 ### Minor Changes
