@@ -539,7 +539,7 @@ const MainnetLendingPools: Record<MainnetLendingPoolKey, LendingPool> = {
   xALGOUSDCTM: {
     provider: LPTokenProvider.TINYMAN,
     lpPoolAppAddress: "EHYUE2VAI22PB5DID4EHUD5YH7UIOE2NG5XPQZ7NZPIHFUQ334C7J5OSTY",
-    lpAssetId: 1734417671,
+    lpAssetId: 2649938842,
     pool0AppId: 2611131944,
     pool1AppId: 971372237,
     asset0Id: 1134696561,
