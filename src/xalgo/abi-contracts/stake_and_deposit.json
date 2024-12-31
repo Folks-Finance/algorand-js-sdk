@@ -1,0 +1,46 @@
+{
+  "name": "StakeAndDeposit",
+  "methods": [
+    {
+      "name": "stake_and_deposit",
+      "args": [
+        {
+          "type": "pay",
+          "name": "send_algo"
+        },
+        {
+          "type": "application",
+          "name": "consensus"
+        },
+        {
+          "type": "application",
+          "name": "pool"
+        },
+        {
+          "type": "application",
+          "name": "pool_manager"
+        },
+        {
+          "type": "asset",
+          "name": "x_algo"
+        },
+        {
+          "type": "asset",
+          "name": "f_x_algo"
+        },
+        {
+          "type": "account",
+          "name": "receiver"
+        },
+        {
+          "type": "uint64",
+          "name": "min_x_algo_received"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ],
+  "networks": {}
+}
