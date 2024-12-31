@@ -1,5 +1,17 @@
 # @folks-finance/algorand-sdk
 
+## 0.1.0
+
+### Minor Changes
+
+- [#56](https://github.com/Folks-Finance/algorand-js-sdk/pull/56) [`592c0fa`](https://github.com/Folks-Finance/algorand-js-sdk/commit/592c0faa187cdd4542c8a26bae0a3310207ca8e1) Thanks [@gidonkatten](https://github.com/gidonkatten)! - updated transactions for new xalgo version
+
+### Patch Changes
+
+- [#65](https://github.com/Folks-Finance/algorand-js-sdk/pull/65) [`1829e69`](https://github.com/Folks-Finance/algorand-js-sdk/commit/1829e696f76cf5ec3ae46ff884788435f7dddb36) Thanks [@gidonkatten](https://github.com/gidonkatten)! - add xalgo pool
+
+- [#56](https://github.com/Folks-Finance/algorand-js-sdk/pull/56) [`592c0fa`](https://github.com/Folks-Finance/algorand-js-sdk/commit/592c0faa187cdd4542c8a26bae0a3310207ca8e1) Thanks [@gidonkatten](https://github.com/gidonkatten)! - stake and deposit util
+
 ## 0.0.7
 
 ### Patch Changes
