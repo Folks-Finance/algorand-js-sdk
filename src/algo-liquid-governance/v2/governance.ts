@@ -420,7 +420,7 @@ function prepareRegisterEscrowOnlineTransactions(
   const escrowAddr = getDistributorLogicSig(senderAddr).address();
 
   // check register fee is either 0 ALGO or 0.2 ALGO
-  if (registerFeeAmount !== 0 && registerFeeAmount !== PAYOUTS_GO_ONLINE_FEE)
+  if (BigInt(registerFeeAmount) !== BigInt(0) && BigInt(registerFeeAmount) !== PAYOUTS_GO_ONLINE_FEE)
     throw Error("Unexpected register fee amount");
 
   const sendAlgo = {
