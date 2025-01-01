@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.1.2
+
+### Patch Changes
+
+- [#74](https://github.com/Folks-Finance/algorand-js-sdk/pull/74) [`dd291d6`](https://github.com/Folks-Finance/algorand-js-sdk/commit/dd291d6754ac0ec2d8c37d041e4a0dc3e4a5b0e3) Thanks [@gidonkatten](https://github.com/gidonkatten)! - fix unexpected register fee amount
+
 ## 0.1.1
 
 ### Patch Changes
