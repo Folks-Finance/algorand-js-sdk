@@ -339,6 +339,13 @@ interface UserLoanInfo {
   liquidationMargin: bigint; // 4 d.p.
 }
 
+interface AssetAdditionalInterest {
+  rateBps: bigint; // 4 d.p.
+  yieldBps: bigint; // 4 d.p.
+}
+
+type AssetsAdditionalInterest = Partial<Record<number, AssetAdditionalInterest>>; // assetId -> interest
+
 interface Oracle {
   oracle0AppId: number;
   oracle1AppId?: number;
@@ -397,6 +404,8 @@ export {
   UserLoanInfoCollateral,
   UserLoanInfoBorrow,
   UserLoanInfo,
+  AssetAdditionalInterest,
+  AssetsAdditionalInterest,
   Oracle,
   OraclePrice,
   OraclePrices,

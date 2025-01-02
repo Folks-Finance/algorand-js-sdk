@@ -4,6 +4,7 @@ const HOURS_IN_YEAR = BigInt(365 * 24);
 const ONE_2_DP = BigInt(1e2);
 const ONE_4_DP = BigInt(1e4);
 const ONE_10_DP = BigInt(1e10);
+const ONE_12_DP = BigInt(1e12);
 const ONE_14_DP = BigInt(1e14);
 const ONE_16_DP = BigInt(1e16);
 
@@ -81,6 +82,7 @@ export {
   HOURS_IN_YEAR,
   ONE_16_DP,
   ONE_14_DP,
+  ONE_12_DP,
   ONE_10_DP,
   ONE_4_DP,
   ONE_2_DP,
