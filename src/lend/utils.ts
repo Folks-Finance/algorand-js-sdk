@@ -12,6 +12,7 @@ import {
 } from "../math-lib";
 import { enc, fromIntToByteHex, getParsedValueFromState, parseUint64s, unixTime } from "../utils";
 
+import { MainnetPools } from "./constants/mainnet-constants";
 import {
   calcBorrowAssetLoanValue,
   calcBorrowBalance,
@@ -40,7 +41,6 @@ import type {
 } from "./types";
 import type { Indexer } from "algosdk";
 import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
-import {MainnetPools} from "./constants/mainnet-constants";
 
 export async function getEscrows(
   indexerClient: Indexer,
