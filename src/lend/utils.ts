@@ -1,6 +1,15 @@
 import { encodeAddress, getApplicationAddress } from "algosdk";
 
-import { compoundEverySecond, maximum, mulScale, ONE_10_DP, ONE_16_DP, ONE_4_DP, SECONDS_IN_YEAR } from "../math-lib";
+import {
+  compoundEverySecond,
+  maximum,
+  mulScale,
+  ONE_10_DP,
+  ONE_12_DP,
+  ONE_16_DP,
+  ONE_4_DP,
+  SECONDS_IN_YEAR
+} from "../math-lib";
 import { enc, fromIntToByteHex, getParsedValueFromState, parseUint64s, unixTime } from "../utils";
 
 import {
@@ -31,6 +40,7 @@ import type {
 } from "./types";
 import type { Indexer } from "algosdk";
 import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import {MainnetPools} from "./constants/mainnet-constants";
 
 export async function getEscrows(
   indexerClient: Indexer,
@@ -359,6 +369,7 @@ export function loanLocalState(state: TealKeyValue[], loanAppId: number, escrowA
  * @param poolManagerInfo - pool manager info which is returned by retrievePoolManagerInfo function
  * @param loanInfo - loan info which is returned by retrieveLoanInfo function
  * @param oraclePrices - oracle prices which is returned by getOraclePrices function
+ * @param xAlgoStakingRateBps - optional xALGO staking rate (in bps) to include in loan net rate/yield
  * @returns Promise<UserLoansInfo> user loans info
  */
 export function userLoanInfo(
@@ -366,6 +377,7 @@ export function userLoanInfo(
   poolManagerInfo: PoolManagerInfo,
   loanInfo: LoanInfo,
   oraclePrices: OraclePrices,
+  xAlgoStakingRateBps?: bigint,
 ): UserLoanInfo {
   const { pools: poolManagerPools } = poolManagerInfo;
   const { pools: loanPools } = loanInfo;
@@ -402,6 +414,13 @@ export function userLoanInfo(
     totalEffectiveCollateralBalanceValue += effectiveBalanceValue;
     netRate += balanceValue * depositInterestRate;
     netYield += balanceValue * depositInterestYield;
+
+    // add xALGO staking apr if requested (must be mainnet)
+    if (assetId === MainnetPools.xALGO.assetId && xAlgoStakingRateBps) {
+      // multiply by 1e12 to standardise at 16 d.p.
+      netRate += balanceValue * xAlgoStakingRateBps * ONE_12_DP;
+      netYield += balanceValue * xAlgoStakingRateBps * ONE_12_DP;
+    }
 
     collaterals.push({
       poolAppId,

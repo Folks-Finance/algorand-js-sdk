@@ -146,6 +146,7 @@ async function retrieveLoanLocalState(
  * @param poolManagerAppId - pool manager application to query about
  * @param oracle - oracle to query
  * @param userAddr - account address for the user
+ * @param xAlgoStakingRateBps - optional xALGO staking rate (in bps) to include in loan net rate/yield
  * @returns Promise<UserLoanInfo[]> user loans infos
  */
 async function retrieveUserLoansInfo(
@@ -154,6 +155,7 @@ async function retrieveUserLoansInfo(
   poolManagerAppId: number,
   oracle: Oracle,
   userAddr: string,
+  xAlgoStakingRateBps?: bigint,
 ): Promise<UserLoanInfo[]> {
   const userLoanInfos: UserLoanInfo[] = [];
 
@@ -178,7 +180,10 @@ async function retrieveUserLoansInfo(
     );
     if (state === undefined) throw Error(`Could not find loan ${loanAppId} in escrow ${escrowAddr}`);
     const localState = loanLocalState(state, loanAppId, escrowAddr);
-    userLoanInfos.push({ ...userLoanInfo(localState, poolManagerInfo, loanInfo, oraclePrices), currentRound });
+    userLoanInfos.push({
+      ...userLoanInfo(localState, poolManagerInfo, loanInfo, oraclePrices, xAlgoStakingRateBps),
+      currentRound,
+    });
   }
 
   return userLoanInfos;
@@ -193,6 +198,7 @@ async function retrieveUserLoansInfo(
  * @param poolManagerAppId - pool manager application to query about
  * @param oracle - oracle to query
  * @param escrowAddr - account address for the loan escrow
+ * @param xAlgoStakingRateBps - optional xALGO staking rate (in bps) to include in loan net rate/yield
  * @returns Promise<UserLoanInfo> user loan info
  */
 async function retrieveUserLoanInfo(
@@ -201,6 +207,7 @@ async function retrieveUserLoanInfo(
   poolManagerAppId: number,
   oracle: Oracle,
   escrowAddr: string,
+  xAlgoStakingRateBps?: bigint,
 ): Promise<UserLoanInfo> {
   // get all prerequisites
   const loanInfoReq = retrieveLoanInfo(client, loanAppId);
@@ -212,7 +219,7 @@ async function retrieveUserLoanInfo(
   const { currentRound, localState: state } = await getAccountApplicationLocalState(client, loanAppId, escrowAddr);
   if (state === undefined) throw Error(`Could not find loan ${loanAppId} in escrow ${escrowAddr}`);
   const localState = loanLocalState(state, loanAppId, escrowAddr);
-  return { ...userLoanInfo(localState, poolInfo, loanInfo, oraclePrices), currentRound };
+  return { ...userLoanInfo(localState, poolInfo, loanInfo, oraclePrices, xAlgoStakingRateBps), currentRound };
 }
 
 /**
