@@ -8,7 +8,7 @@ import {
   ONE_12_DP,
   ONE_16_DP,
   ONE_4_DP,
-  SECONDS_IN_YEAR
+  SECONDS_IN_YEAR,
 } from "../math-lib";
 import { enc, fromIntToByteHex, getParsedValueFromState, parseUint64s, unixTime } from "../utils";
 
@@ -481,6 +481,13 @@ export function userLoanInfo(
     totalEffectiveBorrowBalanceValue += effectiveBorrowBalanceValue;
     netRate -= borrowBalanceValue * interestRate;
     netYield -= borrowBalanceValue * interestYield;
+
+    // subtract xALGO staking apr if requested (must be mainnet)
+    if (assetId === MainnetPools.xALGO.assetId && xAlgoStakingRateBps) {
+      // multiply by 1e12 to standardise at 16 d.p.
+      netRate -= borrowBalanceValue * xAlgoStakingRateBps * ONE_12_DP;
+      netYield -= borrowBalanceValue * xAlgoStakingRateBps * ONE_12_DP;
+    }
 
     borrows.push({
       poolAppId,
