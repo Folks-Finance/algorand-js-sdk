@@ -12,7 +12,6 @@ import {
 } from "../math-lib";
 import { enc, fromIntToByteHex, getParsedValueFromState, parseUint64s, unixTime } from "../utils";
 
-import { MainnetPools } from "./constants/mainnet-constants";
 import {
   calcBorrowAssetLoanValue,
   calcBorrowBalance,
@@ -25,6 +24,7 @@ import {
 } from "./formulae";
 
 import type {
+  AssetsAdditionalInterest,
   DepositStakingInfo,
   DepositStakingProgramInfo,
   LoanInfo,
@@ -369,7 +369,7 @@ export function loanLocalState(state: TealKeyValue[], loanAppId: number, escrowA
  * @param poolManagerInfo - pool manager info which is returned by retrievePoolManagerInfo function
  * @param loanInfo - loan info which is returned by retrieveLoanInfo function
  * @param oraclePrices - oracle prices which is returned by getOraclePrices function
- * @param xAlgoStakingRateBps - optional xALGO staking rate (in bps) to include in loan net rate/yield
+ * @param additionalInterests - optional additional interest to consider in loan net rate/yield
  * @returns Promise<UserLoansInfo> user loans info
  */
 export function userLoanInfo(
@@ -377,7 +377,7 @@ export function userLoanInfo(
   poolManagerInfo: PoolManagerInfo,
   loanInfo: LoanInfo,
   oraclePrices: OraclePrices,
-  xAlgoStakingRateBps?: bigint,
+  additionalInterests?: AssetsAdditionalInterest,
 ): UserLoanInfo {
   const { pools: poolManagerPools } = poolManagerInfo;
   const { pools: loanPools } = loanInfo;
@@ -415,11 +415,12 @@ export function userLoanInfo(
     netRate += balanceValue * depositInterestRate;
     netYield += balanceValue * depositInterestYield;
 
-    // add xALGO staking apr if requested (must be mainnet)
-    if (assetId === MainnetPools.xALGO.assetId && xAlgoStakingRateBps) {
+    // add additional interests if specified
+    if (additionalInterests && additionalInterests[assetId]) {
+      const { rateBps, yieldBps } = additionalInterests[assetId];
       // multiply by 1e12 to standardise at 16 d.p.
-      netRate += balanceValue * xAlgoStakingRateBps * ONE_12_DP;
-      netYield += balanceValue * xAlgoStakingRateBps * ONE_12_DP;
+      netRate += balanceValue * rateBps * ONE_12_DP;
+      netYield += balanceValue * yieldBps * ONE_12_DP;
     }
 
     collaterals.push({
@@ -482,11 +483,12 @@ export function userLoanInfo(
     netRate -= borrowBalanceValue * interestRate;
     netYield -= borrowBalanceValue * interestYield;
 
-    // subtract xALGO staking apr if requested (must be mainnet)
-    if (assetId === MainnetPools.xALGO.assetId && xAlgoStakingRateBps) {
+    // subtracts additional interests if specified
+    if (additionalInterests && additionalInterests[assetId]) {
+      const { rateBps, yieldBps } = additionalInterests[assetId];
       // multiply by 1e12 to standardise at 16 d.p.
-      netRate -= borrowBalanceValue * xAlgoStakingRateBps * ONE_12_DP;
-      netYield -= borrowBalanceValue * xAlgoStakingRateBps * ONE_12_DP;
+      netRate -= borrowBalanceValue * rateBps * ONE_12_DP;
+      netYield -= borrowBalanceValue * yieldBps * ONE_12_DP;
     }
 
     borrows.push({
