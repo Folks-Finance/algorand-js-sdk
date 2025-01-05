@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.1.3
+
+### Patch Changes
+
+- [#76](https://github.com/Folks-Finance/algorand-js-sdk/pull/76) [`03313b7`](https://github.com/Folks-Finance/algorand-js-sdk/commit/03313b7237c32f366a7a1fd2a177d6ecdefab400) Thanks [@gidonkatten](https://github.com/gidonkatten)! - option to include additional interest in net rate and yield calculations
+
 ## 0.1.2
 
 ### Patch Changes
