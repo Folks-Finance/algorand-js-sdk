@@ -3,6 +3,14 @@
   "desc": "Allows users to participate in consensus and receive a liquid staking token",
   "methods": [
     {
+      "name": "claim_fee",
+      "desc": "Send the unclaimed fees to the admin.",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
       "name": "set_proposer_admin",
       "desc": "Privileged operation to set the proposer admin.",
       "args": [
