@@ -479,6 +479,46 @@ function prepareUnstakeTransactions(
 
 /**
  *
+ * Returns a group transaction to claim xALGO fees.
+ *
+ * @param consensusConfig - consensus application and xALGO config
+ * @param consensusState - current state of the consensus application
+ * @param senderAddr - account address for the sender
+ * @param receiverAddr - account address to receive the ALGO fees
+ * @param params - suggested params for the transactions with the fees overwritten
+ * @returns Transaction[] claim fees transactions
+ */
+function prepareClaimConsensusFeesTransactions(
+  consensusConfig: ConsensusConfig,
+  consensusState: ConsensusState,
+  senderAddr: string,
+  receiverAddr: string,
+  params: SuggestedParams,
+): Transaction[] {
+  const { consensusAppId } = consensusConfig;
+
+  const fee = 1000 * (2 + consensusState.proposersBalances.length);
+
+  const atc = new AtomicTransactionComposer();
+  atc.addMethodCall({
+    sender: senderAddr,
+    signer,
+    appID: consensusAppId,
+    method: getMethodByName(xAlgoABIContract.methods, "claim_fee"),
+    methodArgs: [],
+    suggestedParams: { ...params, flatFee: true, fee },
+  });
+
+  // allocate resources
+  const txns = atc.buildGroup().map(({ txn }) => {
+    txn.group = undefined;
+    return txn;
+  });
+  return getTxnsAfterResourceAllocation(consensusConfig, consensusState, txns, [receiverAddr], senderAddr, params);
+}
+
+/**
+ *
  * Only for third-party node runners.
  * Returns a transaction to set the proposer admin which can register online/offline.
  *
@@ -649,6 +689,7 @@ export {
   prepareDelayedStakeTransactions,
   prepareClaimDelayedStakeTransactions,
   prepareUnstakeTransactions,
+  prepareClaimConsensusFeesTransactions,
   prepareSetProposerAdminTransaction,
   prepareRegisterProposerOnlineTransactions,
   prepareRegisterProposerOfflineTransaction,
