@@ -488,7 +488,7 @@ function prepareUnstakeTransactions(
  * @param params - suggested params for the transactions with the fees overwritten
  * @returns Transaction[] claim fees transactions
  */
-function prepareClaimFeesTransactions(
+function prepareClaimConsensusFeesTransactions(
   consensusConfig: ConsensusConfig,
   consensusState: ConsensusState,
   senderAddr: string,
@@ -687,7 +687,7 @@ export {
   prepareDelayedStakeTransactions,
   prepareClaimDelayedStakeTransactions,
   prepareUnstakeTransactions,
-  prepareClaimFeesTransactions,
+  prepareClaimConsensusFeesTransactions,
   prepareSetProposerAdminTransaction,
   prepareRegisterProposerOnlineTransactions,
   prepareRegisterProposerOfflineTransaction,
