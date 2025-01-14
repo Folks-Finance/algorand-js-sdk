@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.1.4
+
+### Patch Changes
+
+- [#78](https://github.com/Folks-Finance/algorand-js-sdk/pull/78) [`113c7cc`](https://github.com/Folks-Finance/algorand-js-sdk/commit/113c7cc2b407cfa8bbd7484dea4897fc41e2472a) Thanks [@gidonkatten](https://github.com/gidonkatten)! - transaction to claim x algo fees
+
 ## 0.1.3
 
 ### Patch Changes
