@@ -497,6 +497,8 @@ function prepareClaimConsensusFeesTransactions(
 ): Transaction[] {
   const { consensusAppId } = consensusConfig;
 
+  const fee = 1000 * (2 + consensusState.proposersBalances.length);
+
   const atc = new AtomicTransactionComposer();
   atc.addMethodCall({
     sender: senderAddr,
@@ -504,7 +506,7 @@ function prepareClaimConsensusFeesTransactions(
     appID: consensusAppId,
     method: getMethodByName(xAlgoABIContract.methods, "claim_fee"),
     methodArgs: [],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee },
   });
 
   // allocate resources
