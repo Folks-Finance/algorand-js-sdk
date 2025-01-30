@@ -48,7 +48,7 @@ async function retrievePactLendingPoolInfo(
   const tvlUsd = Number(pactPoolData?.["tvl_usd"] || 0);
 
   // lending pool deposit interest and additional interest
-  const commonLendingPoolInterest = getCommonLendingPoolInterest(lendingPool, poolManagerInfo, additionalInterests);
+  const commonLendingPoolInterest = getDepositAndAdditionalInterest(lendingPool, poolManagerInfo, additionalInterests);
 
   return {
     ...commonLendingPoolInterest,
@@ -105,7 +105,7 @@ async function retrieveTinymanLendingPoolInfo(
   const tvlUsd = Number(tmPoolData?.["liquidity_in_usd"] || 0);
 
   // lending pool deposit interest and additional interest
-  const commonLendingPoolInterest = getCommonLendingPoolInterest(lendingPool, poolManagerInfo, additionalInterests);
+  const commonLendingPoolInterest = getDepositAndAdditionalInterest(lendingPool, poolManagerInfo, additionalInterests);
 
   return {
     ...commonLendingPoolInterest,
@@ -121,7 +121,7 @@ async function retrieveTinymanLendingPoolInfo(
   };
 }
 
-function getCommonLendingPoolInterest(
+function getDepositAndAdditionalInterest(
   lendingPool: LendingPool,
   poolManagerInfo: PoolManagerInfo,
   additionalInterests?: AssetsAdditionalInterest,
