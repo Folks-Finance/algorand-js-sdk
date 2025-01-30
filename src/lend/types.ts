@@ -52,6 +52,8 @@ interface BaseLendingPoolInfo {
   asset0DepositInterestYield: bigint; // approximation 16 d.p.
   asset1DepositInterestRate: bigint; // 16 d.p.
   asset1DepositInterestYield: bigint; // approximation 16 d.p.
+  additionalInterestRate?: bigint; // 16 d.p.
+  additionalInterestYield?: bigint; // approximation 16 d.p.
   tvlUsd: number;
 }
 
