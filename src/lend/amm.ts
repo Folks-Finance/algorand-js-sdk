@@ -1,4 +1,4 @@
-import { compoundEveryHour, ONE_16_DP } from "../math-lib";
+import { compoundEveryHour, ONE_12_DP, ONE_16_DP } from "../math-lib";
 import {
   getAccountApplicationLocalState,
   getApplicationGlobalState,
@@ -7,6 +7,8 @@ import {
 } from "../utils";
 
 import type {
+  AssetsAdditionalInterest,
+  LendingPool,
   PactLendingPool,
   PactLendingPoolInfo,
   PoolManagerInfo,
@@ -22,12 +24,14 @@ import type { Algodv2, Indexer } from "algosdk";
  * @param client - Algorand client to query
  * @param lendingPool - Pact lending pool to query about
  * @param poolManagerInfo - pool manager info which is returned by retrievePoolManagerInfo function
+ * @param additionalInterests - optional additional interest to consider
  * @returns Promise<LendingPoolInfo> lending pool info
  */
 async function retrievePactLendingPoolInfo(
   client: Algodv2 | Indexer,
   lendingPool: PactLendingPool,
   poolManagerInfo: PoolManagerInfo,
+  additionalInterests?: AssetsAdditionalInterest,
 ): Promise<PactLendingPoolInfo> {
   const { currentRound, globalState: state } = await getApplicationGlobalState(client, lendingPool.lpPoolAppId);
   if (state === undefined) throw Error("Could not find lending pool");
@@ -43,12 +47,11 @@ async function retrievePactLendingPoolInfo(
   const swapFeeInterestRate = BigInt(Math.round(Number(pactPoolData?.["apr_7d"] || 0) * 1e16));
   const tvlUsd = Number(pactPoolData?.["tvl_usd"] || 0);
 
-  // lending pool deposit interest
-  const pool0 = poolManagerInfo.pools[lendingPool.pool0AppId];
-  const pool1 = poolManagerInfo.pools[lendingPool.pool1AppId];
-  if (pool0 === undefined || pool1 === undefined) throw Error("Could not find deposit pool");
+  // lending pool deposit interest and additional interest
+  const commonLendingPoolInterest = getDepositAndAdditionalInterest(lendingPool, poolManagerInfo, additionalInterests);
 
   return {
+    ...commonLendingPoolInterest,
     currentRound,
     fAsset0Supply: fa0s,
     fAsset1Supply: fa1s,
@@ -56,10 +59,6 @@ async function retrievePactLendingPoolInfo(
     fee: config[2],
     swapFeeInterestRate,
     swapFeeInterestYield: compoundEveryHour(swapFeeInterestRate, ONE_16_DP),
-    asset0DepositInterestRate: pool0.depositInterestRate / BigInt(2),
-    asset0DepositInterestYield: pool0.depositInterestYield / BigInt(2),
-    asset1DepositInterestRate: pool1.depositInterestRate / BigInt(2),
-    asset1DepositInterestYield: pool1.depositInterestYield / BigInt(2),
     tvlUsd,
   };
 }
@@ -72,6 +71,7 @@ async function retrievePactLendingPoolInfo(
  * @param tinymanAppId - Tinyman application id where lending pool belongs to
  * @param lendingPool - Pact lending pool to query about
  * @param poolManagerInfo - pool manager info which is returned by retrievePoolManagerInfo function
+ * @param additionalInterests - optional additional interest to consider
  * @returns Promise<LendingPoolInfo> lending pool info
  */
 async function retrieveTinymanLendingPoolInfo(
@@ -79,6 +79,7 @@ async function retrieveTinymanLendingPoolInfo(
   tinymanAppId: number,
   lendingPool: TinymanLendingPool,
   poolManagerInfo: PoolManagerInfo,
+  additionalInterests?: AssetsAdditionalInterest,
 ): Promise<TinymanLendingPoolInfo> {
   const { currentRound, localState: state } = await getAccountApplicationLocalState(
     client,
@@ -103,12 +104,11 @@ async function retrieveTinymanLendingPoolInfo(
   );
   const tvlUsd = Number(tmPoolData?.["liquidity_in_usd"] || 0);
 
-  // lending pool deposit interest
-  const pool0 = poolManagerInfo.pools[lendingPool.pool0AppId];
-  const pool1 = poolManagerInfo.pools[lendingPool.pool1AppId];
-  if (pool0 === undefined || pool1 === undefined) throw Error("Could not find deposit pool");
+  // lending pool deposit interest and additional interest
+  const commonLendingPoolInterest = getDepositAndAdditionalInterest(lendingPool, poolManagerInfo, additionalInterests);
 
   return {
+    ...commonLendingPoolInterest,
     currentRound,
     fAsset0Supply: fa0s,
     fAsset1Supply: fa1s,
@@ -116,12 +116,48 @@ async function retrieveTinymanLendingPoolInfo(
     fee,
     swapFeeInterestRate,
     swapFeeInterestYield,
-    asset0DepositInterestRate: pool0.depositInterestRate / BigInt(2),
-    asset0DepositInterestYield: pool0.depositInterestYield / BigInt(2),
-    asset1DepositInterestRate: pool1.depositInterestRate / BigInt(2),
-    asset1DepositInterestYield: pool1.depositInterestYield / BigInt(2),
     farmInterestYield,
     tvlUsd,
+  };
+}
+
+function getDepositAndAdditionalInterest(
+  lendingPool: LendingPool,
+  poolManagerInfo: PoolManagerInfo,
+  additionalInterests?: AssetsAdditionalInterest,
+) {
+  const { asset0Id, asset1Id, pool0AppId, pool1AppId } = lendingPool;
+
+  // lending pool deposit interest
+  const pool0 = poolManagerInfo.pools[pool0AppId];
+  const pool1 = poolManagerInfo.pools[pool1AppId];
+  if (pool0 === undefined || pool1 === undefined) throw Error("Could not find deposit pool");
+  const asset0DepositInterestRate = pool0.depositInterestRate / BigInt(2);
+  const asset0DepositInterestYield = pool0.depositInterestYield / BigInt(2);
+  const asset1DepositInterestRate = pool1.depositInterestRate / BigInt(2);
+  const asset1DepositInterestYield = pool1.depositInterestYield / BigInt(2);
+
+  // add additional interests if specified
+  let additionalInterestRate;
+  let additionalInterestYield;
+  if (additionalInterests) {
+    for (const assetId of [asset0Id, asset1Id]) {
+      if (additionalInterests[assetId]) {
+        const { rateBps, yieldBps } = additionalInterests[assetId];
+        // multiply by 1e12 to standardise at 16 d.p.
+        additionalInterestRate = (additionalInterestRate || BigInt(0)) + (rateBps * ONE_12_DP) / BigInt(2);
+        additionalInterestYield = (additionalInterestYield || BigInt(0)) + (yieldBps * ONE_12_DP) / BigInt(2);
+      }
+    }
+  }
+
+  return {
+    asset0DepositInterestRate,
+    asset0DepositInterestYield,
+    asset1DepositInterestRate,
+    asset1DepositInterestYield,
+    additionalInterestRate,
+    additionalInterestYield,
   };
 }
 
