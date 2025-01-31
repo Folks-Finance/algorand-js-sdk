@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.1.5
+
+### Patch Changes
+
+- [#81](https://github.com/Folks-Finance/algorand-js-sdk/pull/81) [`e23f100`](https://github.com/Folks-Finance/algorand-js-sdk/commit/e23f100103f38d3fb78be44fd345fad92f90cf03) Thanks [@gidonkatten](https://github.com/gidonkatten)! - support for staking apr in lending pool info
+
 ## 0.1.4
 
 ### Patch Changes
