@@ -6,7 +6,6 @@ import {
   getMethodByName,
   LogicSigAccount,
   makeApplicationCloseOutTxn,
-  makeKeyRegistrationTxnWithSuggestedParams,
   makeKeyRegistrationTxnWithSuggestedParamsFromObject,
   makePaymentTxnWithSuggestedParamsFromObject,
   OnApplicationComplete,
