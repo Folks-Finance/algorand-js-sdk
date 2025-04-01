@@ -6,6 +6,9 @@ import {
   getMethodByName,
   LogicSigAccount,
   makeApplicationCloseOutTxn,
+  makeKeyRegistrationTxnWithSuggestedParams,
+  makeKeyRegistrationTxnWithSuggestedParamsFromObject,
+  makePaymentTxnWithSuggestedParamsFromObject,
   OnApplicationComplete,
 } from "algosdk";
 
@@ -611,6 +614,61 @@ function prepareBurnTransactions(
   });
 }
 
+
+/**
+ *
+ * Returns a transaction to close out an escrow.
+ *
+ * @param client - Algorand client to query
+ * @param senderAddr - account address for the sender
+ * @param params - suggested params for the transactions with the fees overwritten
+ * @returns { txns: Transaction[], escrow: LogicSigAccount } object containing group transaction and generated escrow account
+ */
+async function prepareCloseOutEscrowTransactions(
+  client: Algodv2 | Indexer,
+  senderAddr: string,
+  params: SuggestedParams,
+): Promise<{ txns: Transaction[]; escrow: LogicSigAccount }> {
+  const txns: Transaction[] = [];
+  const escrow = getDistributorLogicSig(senderAddr);
+
+  // register offline txns if needed
+  const { isOnline } = await getAccountDetails(client, escrow.address());
+  if (isOnline) {
+    const userPermissionToRegisterOffline = makePaymentTxnWithSuggestedParamsFromObject({
+      from: senderAddr,
+      to: escrow.address(),
+      amount: 0,
+      suggestedParams: { ...params, flatFee: true, fee: 2000 },
+      note: enc.encode("register offline")
+    });
+    const registerOffline = makeKeyRegistrationTxnWithSuggestedParamsFromObject({
+      from: escrow.address(),
+      suggestedParams: { ...params, flatFee: true, fee: 0 },
+    });
+    txns.push(...[userPermissionToRegisterOffline, registerOffline]);
+  }
+
+  const userPermissionToCloseOut = makePaymentTxnWithSuggestedParamsFromObject({
+    from: senderAddr,
+    to: escrow.address(),
+    amount: 0,
+    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    note: enc.encode("close out")
+  });
+  const closeOut = makePaymentTxnWithSuggestedParamsFromObject({
+    from: escrow.address(),
+    to: senderAddr,
+    amount: 0,
+    closeRemainderTo: senderAddr,
+    suggestedParams: { ...params, flatFee: true, fee: 0 },
+  });
+  txns.push(...[userPermissionToCloseOut, closeOut]);
+
+  return { txns, escrow };
+}
+
+
 export {
   getDistributorLogicSig,
   getDistributorInfo,
@@ -626,4 +684,5 @@ export {
   prepareCommitOrVoteTransaction,
   prepareRemoveLiquidGovernanceEscrowTransactions,
   prepareBurnTransactions,
+  prepareCloseOutEscrowTransactions,
 };
