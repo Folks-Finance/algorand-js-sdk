@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.1.6
+
+### Patch Changes
+
+- [#84](https://github.com/Folks-Finance/algorand-js-sdk/pull/84) [`f515b0b`](https://github.com/Folks-Finance/algorand-js-sdk/commit/f515b0bac216e43020ac1e7e44eee7717f04ea23) Thanks [@gidonkatten](https://github.com/gidonkatten)! - add ability to close out governance escrow
+
 ## 0.1.5
 
 ### Patch Changes
