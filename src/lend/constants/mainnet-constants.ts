@@ -13,6 +13,7 @@ type MainnetPoolKey =
   | "ALGO"
   | "gALGO"
   | "xALGO"
+  | "tALGO"
   | "USDC"
   | "USDt"
   | "GARD"
@@ -65,6 +66,18 @@ const MainnetPools: Record<MainnetPoolKey, Pool> = {
     loans: {
       971388781: BigInt(17),
       971389489: BigInt(2),
+    },
+  },
+  tALGO: {
+    appId: 3073474613,
+    assetId: 2537013734,
+    fAssetId: 3073480070,
+    frAssetId: 3073480071,
+    assetDecimals: 6,
+    poolManagerIndex: 18,
+    loans: {
+      971388781: BigInt(18),
+      971389489: BigInt(3),
     },
   },
   USDC: {
@@ -276,8 +289,10 @@ type MainnetLendingPoolKey =
   | "ALGOGOLDTM"
   | "ALGOSILVERPLP"
   | "ALGOSILVERTM"
+  | "xALGOtALGOTM"
   | "xALGOUSDCPLP"
   | "xALGOUSDCTM"
+  | "tALGOUSDCTM"
   | "USDCwBTCTM"
   | "USDCwETHTM"
   | "USDCwAVAXTM"
@@ -456,6 +471,16 @@ const MainnetLendingPools: Record<MainnetLendingPoolKey, LendingPool> = {
     asset1Id: 246519683,
     feeScale: ONE_4_DP,
   },
+  xALGOtALGOTM: {
+    provider: LPTokenProvider.TINYMAN,
+    lpPoolAppAddress: "P7TYQN3NFBA7XIL6OYVIZ3MQDDZVKQOAH7QEYH2WDZHVVP5MTUW2L7FFW4",
+    lpAssetId: 3074026483,
+    pool0AppId: 3073474613,
+    pool1AppId: 2611131944,
+    asset0Id: 2537013734,
+    asset1Id: 1134696561,
+    feeScale: ONE_4_DP,
+  },
   xALGOUSDCPLP: {
     provider: LPTokenProvider.PACT,
     lpPoolAppId: 2649980181,
@@ -473,6 +498,16 @@ const MainnetLendingPools: Record<MainnetLendingPoolKey, LendingPool> = {
     pool0AppId: 2611131944,
     pool1AppId: 971372237,
     asset0Id: 1134696561,
+    asset1Id: 31566704,
+    feeScale: ONE_4_DP,
+  },
+  tALGOUSDCTM: {
+    provider: LPTokenProvider.TINYMAN,
+    lpPoolAppAddress: "LWAAYBCUROTZ3RO4EBQ7TN7MJ3ZHGCY7MTK6QNLG2HYOS232JKEQ23NG6Y",
+    lpAssetId: 3074051630,
+    pool0AppId: 3073474613,
+    pool1AppId: 971372237,
+    asset0Id: 2537013734,
     asset1Id: 31566704,
     feeScale: ONE_4_DP,
   },
