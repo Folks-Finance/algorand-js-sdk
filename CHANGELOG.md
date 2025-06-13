@@ -1,5 +1,13 @@
 # @folks-finance/algorand-sdk
 
+## 0.1.7
+
+### Patch Changes
+
+- [#88](https://github.com/Folks-Finance/algorand-js-sdk/pull/88) [`3ec303c`](https://github.com/Folks-Finance/algorand-js-sdk/commit/3ec303cca35ce8a1d0de208c2c2cec76fac147f8) Thanks [@gidonkatten](https://github.com/gidonkatten)! - add talgo pool
+
+- [#86](https://github.com/Folks-Finance/algorand-js-sdk/pull/86) [`99a4d97`](https://github.com/Folks-Finance/algorand-js-sdk/commit/99a4d975d838ddda3fcf6cf571423ecf94a95cca) Thanks [@gidonkatten](https://github.com/gidonkatten)! - remove deprecated lending pools
+
 ## 0.1.6
 
 ### Patch Changes
