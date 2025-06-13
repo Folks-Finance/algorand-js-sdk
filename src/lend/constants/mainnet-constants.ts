@@ -473,8 +473,8 @@ const MainnetLendingPools: Record<MainnetLendingPoolKey, LendingPool> = {
   },
   xALGOtALGOTM: {
     provider: LPTokenProvider.TINYMAN,
-    lpPoolAppAddress: "P7TYQN3NFBA7XIL6OYVIZ3MQDDZVKQOAH7QEYH2WDZHVVP5MTUW2L7FFW4",
-    lpAssetId: 3074026483,
+    lpPoolAppAddress: "7OKJA2HXKYKCQ4GVQOXCQEVITILDH4VRIHT6VW5YC5WC4KPUMV2R5KTZW4",
+    lpAssetId: 3074122693,
     pool0AppId: 3073474613,
     pool1AppId: 2611131944,
     asset0Id: 2537013734,
