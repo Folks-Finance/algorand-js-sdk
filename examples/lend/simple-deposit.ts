@@ -1,7 +1,9 @@
 import { assignGroupID } from "algosdk";
 
 import {
+  prefixWithOpUp,
   prepareDepositIntoPool,
+  TestnetOpUp,
   TestnetPoolManagerAppId,
   TestnetPools,
 } from "../../src";
@@ -10,13 +12,14 @@ import { algodClient, sender } from "../config";
 async function main() {
   const poolManager = TestnetPoolManagerAppId;
   const pools = TestnetPools;
+  const opup = TestnetOpUp;
 
   // retrieve params
   const params = await algodClient.getTransactionParams().do();
 
   // deposit 1 ALGO
   const algoDepositAmount = 1e6;
-  const depositTxns = prepareDepositIntoPool(
+  let depositTxns = prepareDepositIntoPool(
     pools.ALGO,
     poolManager,
     sender.addr,
@@ -24,6 +27,9 @@ async function main() {
     algoDepositAmount,
     params,
   );
+
+  // add additional opcode budget (if needed)
+  depositTxns = prefixWithOpUp(opup, sender.addr, depositTxns, 0, params);
 
   // group, sign and submit
   assignGroupID(depositTxns);
