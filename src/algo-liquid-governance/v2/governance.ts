@@ -613,7 +613,6 @@ function prepareBurnTransactions(
   });
 }
 
-
 /**
  *
  * Returns a transaction to close out an escrow.
@@ -639,7 +638,7 @@ async function prepareCloseOutEscrowTransactions(
       to: escrow.address(),
       amount: 0,
       suggestedParams: { ...params, flatFee: true, fee: 2000 },
-      note: enc.encode("register offline")
+      note: enc.encode("register offline"),
     });
     const registerOffline = makeKeyRegistrationTxnWithSuggestedParamsFromObject({
       from: escrow.address(),
@@ -653,7 +652,7 @@ async function prepareCloseOutEscrowTransactions(
     to: escrow.address(),
     amount: 0,
     suggestedParams: { ...params, flatFee: true, fee: 2000 },
-    note: enc.encode("close out")
+    note: enc.encode("close out"),
   });
   const closeOut = makePaymentTxnWithSuggestedParamsFromObject({
     from: escrow.address(),
@@ -666,7 +665,6 @@ async function prepareCloseOutEscrowTransactions(
 
   return { txns, escrow };
 }
-
 
 export {
   getDistributorLogicSig,
