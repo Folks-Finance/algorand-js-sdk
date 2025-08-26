@@ -6,7 +6,17 @@ const TestnetPoolManagerAppId = 147157634;
 
 const TestnetDepositsAppId = 147157692;
 
-type TestnetPoolKey = "ALGO" | "gALGO" | "xALGO" | "USDC" | "USDt" | "goBTC" | "goETH";
+type TestnetPoolKey =
+  | "ALGO"
+  | "gALGO"
+  | "xALGO"
+  | "USDC"
+  | "USDt"
+  | "goBTC"
+  | "goETH"
+  | "ISOLATED_ALGO"
+  | "ISOLATED_USDC"
+  | "ISOLATED_TINY";
 const TestnetPools: Record<TestnetPoolKey, Pool> = {
   ALGO: {
     appId: 147169673,
@@ -98,6 +108,39 @@ const TestnetPools: Record<TestnetPoolKey, Pool> = {
       397181998: BigInt(3),
     },
   },
+  ISOLATED_ALGO: {
+    appId: 744836323,
+    assetId: 0,
+    fAssetId: 744836632,
+    frAssetId: 744836633,
+    assetDecimals: 6,
+    poolManagerIndex: 7,
+    loans: {
+      744837086: BigInt(0),
+    },
+  },
+  ISOLATED_USDC: {
+    appId: 744836375,
+    assetId: 67395862,
+    fAssetId: 744836668,
+    frAssetId: 744836669,
+    assetDecimals: 6,
+    poolManagerIndex: 8,
+    loans: {
+      744837086: BigInt(1),
+    },
+  },
+  ISOLATED_TINY: {
+    appId: 744836793,
+    assetId: 258703304,
+    fAssetId: 744836820,
+    frAssetId: 744836821,
+    assetDecimals: 6,
+    poolManagerIndex: 9,
+    loans: {
+      744837086: BigInt(2),
+    },
+  },
 };
 
 const TestnetLoans: Partial<Record<LoanType, number>> = {
@@ -106,6 +149,7 @@ const TestnetLoans: Partial<Record<LoanType, number>> = {
   [LoanType.ALGO_EFFICIENCY]: 168153622,
   [LoanType.ULTRASWAP_UP]: 397181473,
   [LoanType.ULTRASWAP_DOWN]: 397181998,
+  [LoanType.ALGORAND_ECOSYSTEM]: 744837086,
 };
 
 const TestnetReserveAddress: ReserveAddress = "KLF3MEIIHMTA7YHNPLBDVHLN2MVC27X5M7ULTDZLMEX5XO5XCUP7HGBHMQ";
