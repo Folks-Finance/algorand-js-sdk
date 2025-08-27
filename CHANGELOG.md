@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.1.8
+
+### Patch Changes
+
+- [#90](https://github.com/Folks-Finance/algorand-js-sdk/pull/90) [`1c65d43`](https://github.com/Folks-Finance/algorand-js-sdk/commit/1c65d43aa464b1373998a92c164cdfaca9e2269d) Thanks [@gidonkatten](https://github.com/gidonkatten)! - Added algorand ecosystem pools on testnet
+
 ## 0.1.7
 
 ### Patch Changes
