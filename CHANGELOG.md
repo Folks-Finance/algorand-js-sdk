@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.1.10
+
+### Patch Changes
+
+- [#94](https://github.com/Folks-Finance/algorand-js-sdk/pull/94) [`39bdfd4`](https://github.com/Folks-Finance/algorand-js-sdk/commit/39bdfd46cd0c639b1fab5e2352b6b1baf46d14f8) Thanks [@gidonkatten](https://github.com/gidonkatten)! - added missing global state for pool manager, pools and loans
+
 ## 0.1.9
 
 ### Patch Changes
