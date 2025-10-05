@@ -1,5 +1,6 @@
 import {
   AtomicTransactionComposer,
+  encodeAddress,
   generateAccount,
   getApplicationAddress,
   getMethodByName,
@@ -54,6 +55,9 @@ async function retrieveLoanInfo(client: Algodv2 | Indexer, loanAppId: number): P
 
   const paramsBase64Value = String(getParsedValueFromState(state, "pa"));
   const paramsValue = Buffer.from(paramsBase64Value, "base64").toString("hex");
+  const adminAddress = encodeAddress(Buffer.from(paramsBase64Value, "base64").subarray(0, 32));
+  const poolManagerAppId = Number("0x" + paramsValue.slice(64, 80));
+  const oracleAdapterAppId = Number("0x" + paramsValue.slice(80, 96));
   const canSwapCollateral = Boolean(BigInt("0x" + paramsValue.slice(96, 98)));
 
   const pools: Record<number, PoolLoanInfo> = {};
@@ -82,7 +86,7 @@ async function retrieveLoanInfo(client: Algodv2 | Indexer, loanAppId: number): P
   }
 
   // combine
-  return { currentRound, canSwapCollateral, pools };
+  return { currentRound, adminAddress, poolManagerAppId, oracleAdapterAppId, canSwapCollateral, pools };
 }
 
 /**
