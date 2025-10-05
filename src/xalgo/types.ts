@@ -12,6 +12,9 @@ interface ConsensusState {
     address: string;
     algoBalance: bigint;
   }[];
+  adminAddress: string;
+  registerAdminAddress: string;
+  xGovAdminAddress: string;
   timeDelay: bigint;
   numProposers: bigint;
   maxProposerBalance: bigint;

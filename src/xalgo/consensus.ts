@@ -71,6 +71,11 @@ async function getConsensusState(algodClient: Algodv2, consensusConfig: Consensu
   }));
 
   // global state
+  const adminAddress = encodeAddress(Buffer.from(String(getParsedValueFromState(state, "admin")), "base64"));
+  const registerAdminAddress = encodeAddress(
+    Buffer.from(String(getParsedValueFromState(state, "register_admin")), "base64"),
+  );
+  const xGovAdminAddress = encodeAddress(Buffer.from(String(getParsedValueFromState(state, "xgov_admin")), "base64"));
   const timeDelay = BigInt(getParsedValueFromState(state, "time_delay") || 0);
   const numProposers = BigInt(getParsedValueFromState(state, "num_proposers") || 0);
   const maxProposerBalance = BigInt(getParsedValueFromState(state, "max_proposer_balance") || 0);
@@ -87,6 +92,9 @@ async function getConsensusState(algodClient: Algodv2, consensusConfig: Consensu
     algoBalance,
     xAlgoCirculatingSupply,
     proposersBalances,
+    adminAddress,
+    registerAdminAddress,
+    xGovAdminAddress,
     timeDelay,
     numProposers,
     maxProposerBalance,
