@@ -1,5 +1,7 @@
 import {
   AtomicTransactionComposer,
+  decodeUint64,
+  encodeAddress,
   generateAccount,
   getApplicationAddress,
   getMethodByName,
@@ -41,6 +43,8 @@ async function retrievePoolManagerInfo(client: Algodv2 | Indexer, poolManagerApp
   const { currentRound, globalState: state } = await getApplicationGlobalState(client, poolManagerAppId);
   if (state === undefined) throw Error("Could not find Pool Manager");
 
+  const adminAddress = encodeAddress(Buffer.from(String(getParsedValueFromState(state, "admin")), "base64"));
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pools: Record<number, any> = {};
   for (let i = 0; i < 63; i++) {
@@ -78,7 +82,7 @@ async function retrievePoolManagerInfo(client: Algodv2 | Indexer, poolManagerApp
     }
   }
 
-  return { currentRound, pools };
+  return { currentRound, adminAddress, pools };
 }
 
 /**
@@ -93,6 +97,11 @@ async function retrievePoolInfo(client: Algodv2 | Indexer, pool: Pool): Promise<
   const { currentRound, globalState: state } = await getApplicationGlobalState(client, pool.appId);
   if (state === undefined) throw Error("Could not find Pool");
 
+  const poolManagerAppId = decodeUint64(Buffer.from(String(getParsedValueFromState(state, "pm")), "base64").subarray(0, 8), "safe");
+  const poolAdminAddress = encodeAddress(Buffer.from(String(getParsedValueFromState(state, "ad")), "base64"));
+  const paramsAdminAddress = encodeAddress(Buffer.from(String(getParsedValueFromState(state, "pad")), "base64"));
+  const configAdminAddress = encodeAddress(Buffer.from(String(getParsedValueFromState(state, "cad")), "base64"));
+  const loansAdminAddress = encodeAddress(Buffer.from(String(getParsedValueFromState(state, "lad")), "base64"));
   const varBor = parseUint64s(String(getParsedValueFromState(state, "v")));
   const stblBor = parseUint64s(String(getParsedValueFromState(state, "s")));
   const interest = parseUint64s(String(getParsedValueFromState(state, "i")));
@@ -102,6 +111,11 @@ async function retrievePoolInfo(client: Algodv2 | Indexer, pool: Pool): Promise<
   // combine
   return {
     currentRound,
+    poolManagerAppId,
+    poolAdminAddress,
+    paramsAdminAddress,
+    configAdminAddress,
+    loansAdminAddress,
     variableBorrow: {
       vr0: varBor[0],
       vr1: varBor[1],

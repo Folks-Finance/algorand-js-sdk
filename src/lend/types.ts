@@ -64,6 +64,7 @@ interface TinymanLendingPoolInfo extends BaseLendingPoolInfo {
 
 interface PoolManagerInfo {
   currentRound?: number;
+  adminAddress: string;
   pools: Partial<
     Record<
       number,
@@ -103,6 +104,11 @@ type Pool = BasePool | LPTokenPool;
 
 interface PoolInfo {
   currentRound?: number;
+  poolManagerAppId: number;
+  poolAdminAddress: string;
+  paramsAdminAddress: string;
+  configAdminAddress: string;
+  loansAdminAddress: string;
   variableBorrow: {
     vr0: bigint; // 16 d.p.
     vr1: bigint; // 16 d.p.
@@ -271,6 +277,9 @@ enum LoanType {
 
 interface LoanInfo {
   currentRound?: number;
+  adminAddress: string;
+  poolManagerAppId: number;
+  oracleAdapterAppId: number;
   canSwapCollateral: boolean;
   pools: Partial<Record<number, PoolLoanInfo>>; // poolAppId -> PoolLoanInfo
 }
