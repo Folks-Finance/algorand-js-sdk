@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.1.11
+
+### Patch Changes
+
+- [#96](https://github.com/Folks-Finance/algorand-js-sdk/pull/96) [`4508189`](https://github.com/Folks-Finance/algorand-js-sdk/commit/4508189ad1fe9253d9d87b2cdbda8dff77f87ed2) Thanks [@gidonkatten](https://github.com/gidonkatten)! - added missing state to consensus app
+
 ## 0.1.10
 
 ### Patch Changes
