@@ -23,7 +23,8 @@
     "release": "pnpm build && changeset publish"
   },
   "dependencies": {
-    "algosdk": "^2.9.0"
+    "@algorandfoundation/algokit-utils": "^9.1.2",
+    "algosdk": "^3.5.2"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.0",

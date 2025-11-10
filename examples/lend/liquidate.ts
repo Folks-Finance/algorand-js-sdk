@@ -113,7 +113,7 @@ async function main() {
       let liquidateTxns = prepareLiquidateLoan(
         loanAppId,
         poolManagerAppId,
-        sender.addr,
+        sender.addr.toString(),
         loan.escrowAddress,
         reserveAddress,
         collateralPool,
@@ -129,14 +129,14 @@ async function main() {
 
       // add opup transactions to increase opcode budget TODO better estimate
       const budget = Math.ceil(10 + lpAssets.length + 0.5 * baseAssetIds.length);
-      liquidateTxns = prefixWithOpUp(opup, sender.addr, liquidateTxns, budget, params);
+      liquidateTxns = prefixWithOpUp(opup, sender.addr.toString(), liquidateTxns, budget, params);
 
       // group, sign and submit
       assignGroupID(liquidateTxns);
       const signedTxns = liquidateTxns.map((txn) => txn.signTxn(sender.sk));
       try {
-        const { txId } = await algodClient.sendRawTransaction(signedTxns).do();
-        await waitForConfirmation(algodClient, txId, 1000);
+        const { txid } = await algodClient.sendRawTransaction(signedTxns).do();
+        await waitForConfirmation(algodClient, txid, 1000);
         console.log("Successfully liquidated: " + loan.escrowAddress);
       } catch (e) {
         console.error(e);

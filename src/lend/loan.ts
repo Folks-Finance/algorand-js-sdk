@@ -4,7 +4,7 @@ import {
   generateAccount,
   getApplicationAddress,
   getMethodByName,
-  makeApplicationCloseOutTxn,
+  makeApplicationCloseOutTxnFromObject,
   OnApplicationComplete,
 } from "algosdk";
 
@@ -257,14 +257,14 @@ async function retrieveLiquidatableLoans(
   const res = await req.do();
 
   // metadata
-  const currentRound = res["current-round"];
-  nextToken = res["next-token"];
+  const currentRound = res.currentRound;
+  nextToken = res.nextToken;
 
   // convert to user loan info and add if liquidatable
   for (const acc of res["accounts"]) {
     const escrowAddr = acc["address"];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const state = acc["apps-local-state"]?.find(({ id }: any) => id === loanAppId)?.["key-value"];
+    const state = acc.appsLocalState?.find(({ id }) => id === BigInt(loanAppId))?.keyValue;
+    if (!state) throw new Error(`Cannot find local state for app id ${loanAppId} address ${escrowAddr}`);
     const localState = loanLocalState(state, loanAppId, escrowAddr);
     const loan = userLoanInfo(localState, poolManagerInfo, loanInfo, oraclePrices);
     if (loan.totalEffectiveCollateralBalanceValue < loan.totalEffectiveBorrowBalanceValue)
@@ -371,7 +371,7 @@ function prepareCreateUserLoan(
 ): { txns: Transaction[]; escrow: Account } {
   const escrow = generateAccount();
 
-  const userCall = addEscrowNoteTransaction(userAddr, escrow.addr, loanAppId, "la ", {
+  const userCall = addEscrowNoteTransaction(userAddr, escrow.addr.toString(), loanAppId, "la ", {
     ...params,
     flatFee: true,
     fee: 2000,
@@ -834,7 +834,7 @@ function prepareRepayLoanWithTxn(
 ): Transaction[] {
   const { appId: poolAppId, assetId, frAssetId } = pool;
 
-  const sendAsset = transferAlgoOrAsset(assetId, userAddr, getApplicationAddress(poolAppId), repayAmount, {
+  const sendAsset = transferAlgoOrAsset(assetId, userAddr, getApplicationAddress(poolAppId).toString(), repayAmount, {
     ...params,
     flatFee: true,
     fee: 0,
@@ -964,11 +964,17 @@ function prepareLiquidateLoan(
 
   const refreshPrices = prepareRefreshPricesInOracleAdapter(oracle, liquidatorAddr, lpAssets, baseAssetIds, params);
 
-  const sendAsset = transferAlgoOrAsset(assetId, liquidatorAddr, getApplicationAddress(borPoolAppId), repayAmount, {
-    ...params,
-    flatFee: true,
-    fee: 0,
-  });
+  const sendAsset = transferAlgoOrAsset(
+    assetId,
+    liquidatorAddr,
+    getApplicationAddress(borPoolAppId).toString(),
+    repayAmount,
+    {
+      ...params,
+      flatFee: true,
+      fee: 0,
+    },
+  );
 
   const atc = new AtomicTransactionComposer();
   atc.addMethodCall({
@@ -1103,7 +1109,11 @@ function prepareRemoveUserLoan(
     txn.group = undefined;
     return txn;
   });
-  const optOutTx = makeApplicationCloseOutTxn(escrowAddr, { ...params, flatFee: true, fee: 0 }, loanAppId);
+  const optOutTx = makeApplicationCloseOutTxnFromObject({
+    sender: escrowAddr,
+    appIndex: loanAppId,
+    suggestedParams: { ...params, flatFee: true, fee: 0 },
+  });
   const closeToTx = removeEscrowNoteTransaction(escrowAddr, userAddr, "lr ", { ...params, flatFee: true, fee: 0 });
   return [txns[0], optOutTx, closeToTx];
 }
@@ -1168,7 +1178,7 @@ function prepareFlashLoanEnd(
 ): Transaction[] {
   const { appId, assetId } = pool;
 
-  const sendAsset = transferAlgoOrAsset(assetId, userAddr, getApplicationAddress(appId), repaymentAmount, {
+  const sendAsset = transferAlgoOrAsset(assetId, userAddr, getApplicationAddress(appId).toString(), repaymentAmount, {
     ...params,
     flatFee: true,
     fee: 0,

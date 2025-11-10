@@ -50,7 +50,7 @@ export async function getEscrows(
   removeNotePrefix: string,
 ): Promise<Set<string>> {
   const escrows: Set<string> = new Set();
-  const appAddress = getApplicationAddress(appId);
+  const appAddress = getApplicationAddress(appId).toString();
 
   const addedReq = indexerClient
     .searchForTransactions()
@@ -70,9 +70,9 @@ export async function getEscrows(
   const [added, removed] = await Promise.all([addedReq, removedReq]);
 
   for (const txn of added["transactions"]) {
-    const receiver: string = txn["payment-transaction"]["receiver"];
+    const receiver = txn.paymentTransaction?.receiver;
     if (receiver === appAddress) {
-      const note: Uint8Array = Buffer.from(txn["note"], "base64");
+      const note: Uint8Array = Buffer.from(txn.note!);
       const address = encodeAddress(note.slice(addNotePrefix.length));
       escrows.add(address);
     }

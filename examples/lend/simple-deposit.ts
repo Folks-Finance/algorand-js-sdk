@@ -22,14 +22,14 @@ async function main() {
   let depositTxns = prepareDepositIntoPool(
     pools.ALGO,
     poolManager,
-    sender.addr,
-    sender.addr, // specify here deposit escrow if you'd prefer to receive fALGO there
+    sender.addr.toString(),
+    sender.addr.toString(), // specify here deposit escrow if you'd prefer to receive fALGO there
     algoDepositAmount,
     params,
   );
 
   // add additional opcode budget (if needed)
-  depositTxns = prefixWithOpUp(opup, sender.addr, depositTxns, 0, params);
+  depositTxns = prefixWithOpUp(opup, sender.addr.toString(), depositTxns, 0, params);
 
   // group, sign and submit
   assignGroupID(depositTxns);

@@ -5,7 +5,7 @@ import {
   getApplicationAddress,
   getMethodByName,
   LogicSigAccount,
-  makeApplicationCloseOutTxn,
+  makeApplicationCloseOutTxnFromObject,
   makeKeyRegistrationTxnWithSuggestedParamsFromObject,
   makePaymentTxnWithSuggestedParamsFromObject,
   OnApplicationComplete,
@@ -93,7 +93,11 @@ async function getUserLiquidGovernanceInfo(
   const escrowAddr = getDistributorLogicSig(userAddr).address();
 
   // get user account local state
-  const { currentRound, localState: state } = await getAccountApplicationLocalState(client, appId, escrowAddr);
+  const { currentRound, localState: state } = await getAccountApplicationLocalState(
+    client,
+    appId,
+    escrowAddr.toString(),
+  );
   if (state === undefined) throw Error(`Could not find user ${userAddr} in liquid gov ${appId}`);
 
   // user local state
@@ -135,15 +139,15 @@ async function getEscrowGovernanceStatus(
     .addressRole("sender")
     .txType("pay")
     .notePrefix(enc.encode(notePrefix));
-  const [res, bal] = await Promise.all([req.do(), getAccountDetails(indexerClient, escrowAddr)]);
+  const [res, bal] = await Promise.all([req.do(), getAccountDetails(indexerClient, escrowAddr.toString())]);
   const { currentRound, isOnline, holdings: assetHoldings } = bal;
   const algoBalance = assetHoldings.get(0)!;
 
   for (const txn of res["transactions"]) {
-    const payTxn = txn["tx-type"] === "appl" ? txn["inner-txns"][0] : txn;
-    const receiver: string = payTxn["payment-transaction"]["receiver"];
+    const payTxn = txn.txType === "appl" ? txn.innerTxns?.[0] : txn;
+    const receiver = payTxn?.paymentTransaction?.receiver;
     if (receiver === signUpAddr) {
-      const note: string = Buffer.from(payTxn["note"], "base64").toString();
+      const note: string = Buffer.from(payTxn?.note ?? new Uint8Array()).toString();
       const NOTE_SPECS_REGEX = new RegExp(String.raw`^${notePrefix}(?<version>\d+):j(?<jsonData>.*)$`);
       const match = note.match(NOTE_SPECS_REGEX);
 
@@ -197,7 +201,7 @@ function prepareAddLiquidGovernanceEscrowTransactions(
   const { appId } = distributor;
   const escrow = getDistributorLogicSig(userAddr);
 
-  const userCall = addEscrowNoteTransaction(userAddr, escrow.address(), appId, "ga ", {
+  const userCall = addEscrowNoteTransaction(userAddr, escrow.address().toString(), appId, "ga ", {
     ...params,
     flatFee: true,
     fee: 2000,
@@ -249,7 +253,7 @@ function prepareMintTransactions(
   const escrowAddr = getDistributorLogicSig(senderAddr).address();
 
   const sendAlgo = {
-    txn: transferAlgoOrAsset(0, senderAddr, escrowAddr, amount, { ...params, flatFee: true, fee: 0 }),
+    txn: transferAlgoOrAsset(0, senderAddr, escrowAddr.toString(), amount, { ...params, flatFee: true, fee: 0 }),
     signer,
   };
 
@@ -330,7 +334,7 @@ function prepareUnmintTransactions(
   const escrowAddr = getDistributorLogicSig(senderAddr).address();
 
   const sendgALGO = {
-    txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId), amount, {
+    txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId).toString(), amount, {
       ...params,
       flatFee: true,
       fee: 0,
@@ -426,7 +430,11 @@ function prepareRegisterEscrowOnlineTransactions(
     throw Error("Unexpected register fee amount");
 
   const sendAlgo = {
-    txn: transferAlgoOrAsset(0, senderAddr, escrowAddr, registerFeeAmount, { ...params, flatFee: true, fee: 0 }),
+    txn: transferAlgoOrAsset(0, senderAddr, escrowAddr.toString(), registerFeeAmount, {
+      ...params,
+      flatFee: true,
+      fee: 0,
+    }),
     signer,
   };
 
@@ -555,18 +563,12 @@ function prepareRemoveLiquidGovernanceEscrowTransactions(
     txn.group = undefined;
     return txn;
   });
-  const optOutTx = makeApplicationCloseOutTxn(
-    escrowAddr,
-    { ...params, flatFee: true, fee: 0 },
-    distributor.appId,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    escrowAddr,
-  );
+  const optOutTx = makeApplicationCloseOutTxnFromObject({
+    sender: escrowAddr,
+    appIndex: distributor.appId,
+    suggestedParams: { ...params, flatFee: true, fee: 0 },
+    rekeyTo: escrowAddr,
+  });
   return [txns[0], optOutTx];
 }
 
@@ -590,7 +592,7 @@ function prepareBurnTransactions(
   params: SuggestedParams,
 ): Transaction[] {
   const sendgALGO = {
-    txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId), amount, {
+    txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId).toString(), amount, {
       ...params,
       flatFee: true,
       fee: 0,
@@ -631,32 +633,32 @@ async function prepareCloseOutEscrowTransactions(
   const escrow = getDistributorLogicSig(senderAddr);
 
   // register offline txns if needed
-  const { isOnline } = await getAccountDetails(client, escrow.address());
+  const { isOnline } = await getAccountDetails(client, escrow.address().toString());
   if (isOnline) {
     const userPermissionToRegisterOffline = makePaymentTxnWithSuggestedParamsFromObject({
-      from: senderAddr,
-      to: escrow.address(),
+      sender: senderAddr,
+      receiver: escrow.address(),
       amount: 0,
       suggestedParams: { ...params, flatFee: true, fee: 2000 },
       note: enc.encode("register offline"),
     });
     const registerOffline = makeKeyRegistrationTxnWithSuggestedParamsFromObject({
-      from: escrow.address(),
+      sender: escrow.address(),
       suggestedParams: { ...params, flatFee: true, fee: 0 },
     });
     txns.push(...[userPermissionToRegisterOffline, registerOffline]);
   }
 
   const userPermissionToCloseOut = makePaymentTxnWithSuggestedParamsFromObject({
-    from: senderAddr,
-    to: escrow.address(),
+    sender: senderAddr,
+    receiver: escrow.address(),
     amount: 0,
     suggestedParams: { ...params, flatFee: true, fee: 2000 },
     note: enc.encode("close out"),
   });
   const closeOut = makePaymentTxnWithSuggestedParamsFromObject({
-    from: escrow.address(),
-    to: senderAddr,
+    sender: escrow.address(),
+    receiver: senderAddr,
     amount: 0,
     closeRemainderTo: senderAddr,
     suggestedParams: { ...params, flatFee: true, fee: 0 },

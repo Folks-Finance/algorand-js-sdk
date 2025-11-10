@@ -23,15 +23,15 @@ async function main() {
   let stakeTransactions = prepareImmediateStakeTransactions(
     consensusConfig,
     consensusState,
-    sender.addr,
-    sender.addr,
+    sender.addr.toString(),
+    sender.addr.toString(),
     stakeAmount,
     minReceivedAmount,
     params,
   );
 
   // add additional opcode budget (if needed)
-  stakeTransactions = prefixWithOpUp(opup, sender.addr, stakeTransactions, 0, params);
+  stakeTransactions = prefixWithOpUp(opup, sender.addr.toString(), stakeTransactions, 0, params);
 
   // group, sign and submit
   assignGroupID(stakeTransactions);

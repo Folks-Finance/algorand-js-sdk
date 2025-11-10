@@ -3,7 +3,7 @@ import {
   generateAccount,
   getApplicationAddress,
   getMethodByName,
-  makeApplicationCloseOutTxn,
+  makeApplicationCloseOutTxnFromObject,
   OnApplicationComplete,
 } from "algosdk";
 
@@ -183,7 +183,7 @@ function prepareAddDepositStakingEscrow(
 ): { txns: Transaction[]; escrow: Account } {
   const escrow = generateAccount();
 
-  const userCall = addEscrowNoteTransaction(userAddr, escrow.addr, depositStakingAppId, "fa ", {
+  const userCall = addEscrowNoteTransaction(userAddr, escrow.addr.toString(), depositStakingAppId, "fa ", {
     ...params,
     flatFee: true,
     fee: 2000,
@@ -314,13 +314,13 @@ function prepareClaimRewardsOfDepositStakingEscrow(
     appID: depositStakingAppId,
     method: getMethodByName(depositStakingABIContract.methods, "claim_rewards"),
     methodArgs: [escrowAddr, receiverAddr, stakeIndex],
+    appForeignAssets: rewardAssetIds,
     suggestedParams: { ...params, flatFee: true, fee: 4000 },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
     return txn;
   });
-  txns[0].appForeignAssets = rewardAssetIds;
   return txns[0];
 }
 
@@ -448,7 +448,11 @@ function prepareRemoveDepositStakingEscrow(
     txn.group = undefined;
     return txn;
   });
-  const optOutTx = makeApplicationCloseOutTxn(escrowAddr, params, depositStakingAppId);
+  const optOutTx = makeApplicationCloseOutTxnFromObject({
+    sender: escrowAddr,
+    appIndex: depositStakingAppId,
+    suggestedParams: params,
+  });
   const closeToTx = removeEscrowNoteTransaction(escrowAddr, userAddr, "fr ", params);
   return [txns[0], optOutTx, closeToTx];
 }

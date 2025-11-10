@@ -5,7 +5,7 @@ import {
   generateAccount,
   getApplicationAddress,
   getMethodByName,
-  makeApplicationCloseOutTxn,
+  makeApplicationCloseOutTxnFromObject,
   OnApplicationComplete,
 } from "algosdk";
 
@@ -97,7 +97,10 @@ async function retrievePoolInfo(client: Algodv2 | Indexer, pool: Pool): Promise<
   const { currentRound, globalState: state } = await getApplicationGlobalState(client, pool.appId);
   if (state === undefined) throw Error("Could not find Pool");
 
-  const poolManagerAppId = decodeUint64(Buffer.from(String(getParsedValueFromState(state, "pm")), "base64").subarray(0, 8), "safe");
+  const poolManagerAppId = decodeUint64(
+    Buffer.from(String(getParsedValueFromState(state, "pm")), "base64").subarray(0, 8),
+    "safe",
+  );
   const poolAdminAddress = encodeAddress(Buffer.from(String(getParsedValueFromState(state, "ad")), "base64"));
   const paramsAdminAddress = encodeAddress(Buffer.from(String(getParsedValueFromState(state, "pad")), "base64"));
   const configAdminAddress = encodeAddress(Buffer.from(String(getParsedValueFromState(state, "cad")), "base64"));
@@ -299,7 +302,7 @@ function prepareAddDepositEscrowToDeposits(
 ): { txns: Transaction[]; escrow: Account } {
   const escrow = generateAccount();
 
-  const userCall = addEscrowNoteTransaction(userAddr, escrow.addr, depositsAppId, "da ", {
+  const userCall = addEscrowNoteTransaction(userAddr, escrow.addr.toString(), depositsAppId, "da ", {
     ...params,
     flatFee: true,
     fee: 2000,
@@ -385,7 +388,7 @@ function prepareDepositIntoPool(
 ): Transaction[] {
   const { appId, assetId, fAssetId } = pool;
 
-  const sendAsset = transferAlgoOrAsset(assetId, userAddr, getApplicationAddress(appId), assetAmount, {
+  const sendAsset = transferAlgoOrAsset(assetId, userAddr, getApplicationAddress(appId).toString(), assetAmount, {
     ...params,
     flatFee: true,
     fee: 0,
@@ -488,11 +491,17 @@ function prepareWithdrawFromPool(
 ): Transaction[] {
   const { appId: poolAppId, assetId, fAssetId } = pool;
 
-  const sendfAsset = transferAlgoOrAsset(fAssetId, userAddr, getApplicationAddress(poolAppId), fAssetAmount, {
-    ...params,
-    flatFee: true,
-    fee: 0,
-  });
+  const sendfAsset = transferAlgoOrAsset(
+    fAssetId,
+    userAddr,
+    getApplicationAddress(poolAppId).toString(),
+    fAssetAmount,
+    {
+      ...params,
+      flatFee: true,
+      fee: 0,
+    },
+  );
 
   const atc = new AtomicTransactionComposer();
   atc.addMethodCall({
@@ -608,7 +617,11 @@ function prepareRemoveDepositEscrowFromDeposits(
     txn.group = undefined;
     return txn;
   });
-  const optOutTx = makeApplicationCloseOutTxn(escrowAddr, { ...params, flatFee: true, fee: 0 }, depositsAppId);
+  const optOutTx = makeApplicationCloseOutTxnFromObject({
+    sender: escrowAddr,
+    appIndex: depositsAppId,
+    suggestedParams: { ...params, flatFee: true, fee: 0 },
+  });
   const closeToTx = removeEscrowNoteTransaction(escrowAddr, userAddr, "dr ", { ...params, flatFee: true, fee: 0 });
   return [txns[0], optOutTx, closeToTx];
 }

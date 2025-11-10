@@ -1,5 +1,5 @@
 interface DistributorInfo {
-  currentRound: number; // round the data was read at
+  currentRound: bigint; // round the data was read at
   dispenserAppId: number; // id of dispenser app which mints gALGO
   premintEnd?: bigint; // unix timestamp for the end of the pre-mint period
   commitEnd: bigint; // unix timestamp for end of the commitment period
@@ -13,7 +13,7 @@ interface DistributorInfo {
 }
 
 interface UserCommitmentInfo {
-  currentRound: number;
+  currentRound: bigint;
   premint?: bigint; // amount of ALGOs the user has pre-minted and not yet claimed
   commitment: bigint; // amount of ALGOs the user has committed
   commitmentClaimed: bigint; // amount of ALGOs the user has committed whose rewards have already been claimed

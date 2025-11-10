@@ -3,7 +3,7 @@ import {
   AtomicTransactionComposer,
   getApplicationAddress,
   getMethodByName,
-  makeApplicationOptInTxn,
+  makeApplicationOptInTxnFromObject,
 } from "algosdk";
 
 import { getParsedValueFromState, signer, transferAlgoOrAsset } from "../../utils";
@@ -24,8 +24,9 @@ import type { Indexer, SuggestedParams, Transaction } from "algosdk";
  */
 async function getDistributorInfo(indexerClient: Indexer, distributor: Distributor): Promise<DistributorInfo> {
   const { appId } = distributor;
-  const res = await indexerClient.lookupApplications(appId).do();
-  const state = res["application"]["params"]["global-state"];
+  const { currentRound, application } = await indexerClient.lookupApplications(appId).do();
+  const state = application?.params.globalState;
+  if (!state) throw new Error(`Cannot find global state for app id ${appId}`);
 
   const dispenserAppId = Number(getParsedValueFromState(state, "dispenser_app_id") || 0);
   const commitEnd = BigInt(getParsedValueFromState(state, "commit_end") || 0);
@@ -42,7 +43,7 @@ async function getDistributorInfo(indexerClient: Indexer, distributor: Distribut
   const premintEnd = premintEndState !== undefined ? BigInt(premintEndState) : undefined;
 
   return {
-    currentRound: res["current-round"],
+    currentRound,
     dispenserAppId,
     premintEnd,
     commitEnd,
@@ -73,12 +74,14 @@ async function getUserLiquidGovernanceInfo(
   const { appId } = distributor;
 
   // get user account local state
-  const req = indexerClient.lookupAccountAppLocalStates(userAddr).applicationID(appId);
-  const res = await req.do();
+  const { currentRound, appsLocalStates } = await indexerClient
+    .lookupAccountAppLocalStates(userAddr)
+    .applicationID(appId)
+    .do();
+  if (!appsLocalStates) throw new Error(`Cannot find local state for app id ${appId} address ${userAddr}`);
 
   // user local state
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const state = res["apps-local-states"]?.find((app: any) => app.id === appId)?.["key-value"];
+  const state = appsLocalStates.find((app) => app.id === BigInt(appId))?.keyValue;
   if (state === undefined) throw new Error("Unable to find commitment for: " + userAddr + ".");
   const commitment = BigInt(getParsedValueFromState(state, "commitment") || 0);
   const commitmentClaimed = BigInt(getParsedValueFromState(state, "commitment_claimed") || 0);
@@ -88,7 +91,7 @@ async function getUserLiquidGovernanceInfo(
   const premint = premintState !== undefined ? BigInt(premintState) : undefined;
 
   return {
-    currentRound: res["current-round"],
+    currentRound,
     premint,
     commitment,
     commitmentClaimed,
@@ -120,7 +123,7 @@ function prepareMintTransactions(
 ): Transaction[] {
   const atc = new AtomicTransactionComposer();
   const payment = {
-    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(distributor.appId), amount, {
+    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(distributor.appId).toString(), amount, {
       ...params,
       fee: 0,
       flatFee: true,
@@ -141,11 +144,15 @@ function prepareMintTransactions(
     txn.group = undefined;
     return txn;
   });
-  // for ledger compatibility (max 2 app args), remove index references which are not strictly needed
-  txns[1].appArgs = txns[1].appArgs?.slice(0, -2);
   // user must be opted in before they can mint in the commitment period
   if (includeOptIn)
-    txns.unshift(makeApplicationOptInTxn(senderAddr, { ...params, fee: 1000, flatFee: true }, distributor.appId));
+    txns.unshift(
+      makeApplicationOptInTxnFromObject({
+        sender: senderAddr,
+        appIndex: distributor.appId,
+        suggestedParams: { ...params, fee: 1000, flatFee: true },
+      }),
+    );
   return assignGroupID(txns);
 }
 
@@ -210,7 +217,7 @@ function prepareUnmintTransactions(
 ): Transaction[] {
   const atc = new AtomicTransactionComposer();
   const assetTransfer = {
-    txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId), amount, {
+    txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId).toString(), amount, {
       ...params,
       fee: 0,
       flatFee: true,
@@ -290,7 +297,7 @@ function prepareBurnTransactions(
 ): Transaction[] {
   const atc = new AtomicTransactionComposer();
   const assetTransfer = {
-    txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId), amount, {
+    txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId).toString(), amount, {
       ...params,
       fee: 0,
       flatFee: true,
@@ -347,8 +354,6 @@ function prepareEarlyClaimGovernanceRewardsTransaction(
     txn.group = undefined;
     return txn;
   });
-  // for ledger compatibility (max 2 app args), remove index references which are not strictly needed
-  txns[0].appArgs = txns[0].appArgs?.slice(0, -2);
   return txns[0];
 }
 

@@ -28,8 +28,8 @@ async function main() {
   const flashLoanTxns = wrapWithFlashLoan(
     insideTxns,
     pools.ALGO,
-    sender.addr,
-    sender.addr,
+    sender.addr.toString(),
+    sender.addr.toString(),
     reserveAddress,
     algoBorrowAmount,
     params,
