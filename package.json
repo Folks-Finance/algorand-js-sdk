@@ -22,7 +22,7 @@
     "example": "pnpx tsx",
     "release": "pnpm build && changeset publish"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@algorandfoundation/algokit-utils": "^9.1.2",
     "algosdk": "^3.5.2"
   },
