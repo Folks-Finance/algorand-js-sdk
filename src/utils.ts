@@ -50,6 +50,7 @@ async function getApplicationGlobalState(
   currentRound?: bigint;
   globalState?: TealKeyValue[];
 }> {
+  console.log("client instanceof Algodv2", client instanceof Algodv2);
   if (client instanceof Algodv2) {
     const res = await client.getApplicationByID(appId).do();
     return { globalState: res.params.globalState };
