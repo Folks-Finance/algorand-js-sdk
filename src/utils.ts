@@ -1,15 +1,25 @@
 import {
-  Algodv2,
   decodeAddress,
   getApplicationAddress,
   makeAssetTransferTxnWithSuggestedParamsFromObject,
   makePaymentTxnWithSuggestedParamsFromObject,
 } from "algosdk";
 
-import type { Indexer, SuggestedParams, Transaction } from "algosdk";
+import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 import type { Box, TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
 
 const enc = new TextEncoder();
+
+/**
+ * Type guard to distinguish Algodv2 from Indexer clients.
+ *
+ * Checks for `getApplicationByID` which is a stable Algodv2 method that Indexer doesn't have.
+ *
+ * Note: For future proofing, when updating the `algosdk` package, make sure to check for this method.
+ */
+function isAlgodClient(client: Algodv2 | Indexer): client is Algodv2 {
+  return typeof (client as Algodv2).getApplicationByID === "function";
+}
 
 /**
  * Transfer algo or asset. 0 assetId indicates algo transfer, else asset transfer.
@@ -50,7 +60,7 @@ async function getApplicationGlobalState(
   currentRound?: bigint;
   globalState?: TealKeyValue[];
 }> {
-  if (client instanceof Algodv2) {
+  if (isAlgodClient(client)) {
     const res = await client.getApplicationByID(appId).do();
     return { globalState: res.params.globalState };
   } else {
@@ -70,7 +80,7 @@ async function getAccountApplicationLocalState(
   currentRound?: bigint;
   localState?: TealKeyValue[];
 }> {
-  if (client instanceof Algodv2) {
+  if (isAlgodClient(client)) {
     const res = await client.accountApplicationInformation(addr, appId).do();
     return { localState: res.appLocalState?.keyValue };
   } else {
@@ -85,7 +95,7 @@ async function getAccountApplicationLocalState(
  */
 async function getApplicationBox(client: Algodv2 | Indexer, appId: number, boxName: Uint8Array): Promise<Box> {
   return await (
-    client instanceof Algodv2
+    isAlgodClient(client)
       ? client.getApplicationBoxByName(appId, boxName)
       : client.lookupApplicationBoxByIDandName(appId, boxName)
   ).do();
@@ -105,7 +115,7 @@ async function getAccountDetails(
   const holdings: Map<number, bigint> = new Map();
 
   try {
-    if (client instanceof Algodv2) {
+    if (isAlgodClient(client)) {
       const account = await client.accountInformation(addr).do();
 
       const assets = account.assets || [];
