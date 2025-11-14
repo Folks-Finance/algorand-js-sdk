@@ -38,13 +38,13 @@ async function main() {
   const algoTxnIndexForFlashLoanEnd = insideTxns.length + 3;
   const algoFlashLoanBegin = prepareFlashLoanBegin(
     pools.ALGO,
-    sender.addr,
-    sender.addr,
+    sender.addr.toString(),
+    sender.addr.toString(),
     algoBorrowAmount,
     algoTxnIndexForFlashLoanEnd,
     params,
   );
-  const algoFlashLoanEnd = prepareFlashLoanEnd(pools.ALGO, sender.addr, reserveAddress, algoRepaymentAmount, params);
+  const algoFlashLoanEnd = prepareFlashLoanEnd(pools.ALGO, sender.addr.toString(), reserveAddress, algoRepaymentAmount, params);
 
   // flash loan of 1 USDC, repayment will be 1.001 USDC (0.1% + 1)
   const usdcBorrowAmount = 1e6;
@@ -52,13 +52,13 @@ async function main() {
   const usdcTxnIndexForFlashLoanEnd = insideTxns.length + 5;
   const usdcFlashLoanBegin = prepareFlashLoanBegin(
     pools.USDC,
-    sender.addr,
-    sender.addr,
+    sender.addr.toString(),
+    sender.addr.toString(),
     usdcBorrowAmount,
     usdcTxnIndexForFlashLoanEnd,
     params,
   );
-  const usdcFlashLoanEnd = prepareFlashLoanEnd(pools.USDC, sender.addr, reserveAddress, usdcRepaymentAmount, params);
+  const usdcFlashLoanEnd = prepareFlashLoanEnd(pools.USDC, sender.addr.toString(), reserveAddress, usdcRepaymentAmount, params);
 
   // build
   const flashLoanTxns: Transaction[] = [

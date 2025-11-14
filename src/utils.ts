@@ -1,35 +1,45 @@
 import {
-  Algodv2,
   decodeAddress,
   getApplicationAddress,
   makeAssetTransferTxnWithSuggestedParamsFromObject,
   makePaymentTxnWithSuggestedParamsFromObject,
 } from "algosdk";
 
-import type { Indexer, SuggestedParams, Transaction } from "algosdk";
+import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 import type { Box, TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
 
 const enc = new TextEncoder();
+
+/**
+ * Type guard to distinguish Algodv2 from Indexer clients.
+ *
+ * Checks for `getApplicationByID` which is a stable Algodv2 method that Indexer doesn't have.
+ *
+ * Note: For future proofing, when updating the `algosdk` package, make sure to check for this method.
+ */
+function isAlgodClient(client: Algodv2 | Indexer): client is Algodv2 {
+  return typeof (client as Algodv2).getApplicationByID === "function";
+}
 
 /**
  * Transfer algo or asset. 0 assetId indicates algo transfer, else asset transfer.
  */
 function transferAlgoOrAsset(
   assetId: number,
-  from: string,
-  to: string,
+  sender: string,
+  receiver: string,
   amount: number | bigint,
   params: SuggestedParams,
 ): Transaction {
   return assetId !== 0
     ? makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from,
-        to,
+        sender,
+        receiver,
         amount,
         suggestedParams: params,
         assetIndex: assetId,
       })
-    : makePaymentTxnWithSuggestedParamsFromObject({ from, to, amount, suggestedParams: params });
+    : makePaymentTxnWithSuggestedParamsFromObject({ sender, receiver, amount, suggestedParams: params });
 }
 
 const signer = async () => [];
@@ -47,21 +57,16 @@ async function getApplicationGlobalState(
   client: Algodv2 | Indexer,
   appId: number,
 ): Promise<{
-  currentRound?: number;
+  currentRound?: bigint;
   globalState?: TealKeyValue[];
 }> {
-  const res = await (
-    client instanceof Algodv2 ? client.getApplicationByID(appId) : client.lookupApplications(appId)
-  ).do();
-
-  // algod https://developer.algorand.org/docs/rest-apis/algod/#application
-  // indexer https://developer.algorand.org/docs/rest-apis/indexer/#lookupapplicationbyid-response-200
-  const app = client instanceof Algodv2 ? res : res["application"];
-
-  return {
-    currentRound: res["current-round"],
-    globalState: app["params"]["global-state"],
-  };
+  if (isAlgodClient(client)) {
+    const res = await client.getApplicationByID(appId).do();
+    return { globalState: res.params.globalState };
+  } else {
+    const { currentRound, application } = await client.lookupApplications(appId).do();
+    return { currentRound, globalState: application?.params.globalState };
+  }
 }
 
 /**
@@ -72,25 +77,17 @@ async function getAccountApplicationLocalState(
   appId: number,
   addr: string,
 ): Promise<{
-  currentRound?: number;
+  currentRound?: bigint;
   localState?: TealKeyValue[];
 }> {
-  const res = await (
-    client instanceof Algodv2
-      ? client.accountApplicationInformation(addr, appId)
-      : client.lookupAccountAppLocalStates(addr).applicationID(appId)
-  ).do();
-
-  // algod https://developer.algorand.org/docs/rest-apis/algod/#accountapplicationinformation-response-200
-  // indexer https://developer.algorand.org/docs/rest-apis/indexer/#lookupaccountapplocalstates-response-200
-  const localState =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    client instanceof Algodv2 ? res["app-local-state"] : res["apps-local-states"]?.find(({ id }: any) => id === appId);
-
-  return {
-    currentRound: res["current-round"],
-    localState: localState["key-value"],
-  };
+  if (isAlgodClient(client)) {
+    const res = await client.accountApplicationInformation(addr, appId).do();
+    return { localState: res.appLocalState?.keyValue };
+  } else {
+    const { currentRound, appsLocalStates } = await client.lookupAccountAppLocalStates(addr).applicationID(appId).do();
+    const localState = appsLocalStates.find(({ id }) => id === BigInt(appId));
+    return { currentRound, localState: localState?.keyValue };
+  }
 }
 
 /**
@@ -98,7 +95,7 @@ async function getAccountApplicationLocalState(
  */
 async function getApplicationBox(client: Algodv2 | Indexer, appId: number, boxName: Uint8Array): Promise<Box> {
   return await (
-    client instanceof Algodv2
+    isAlgodClient(client)
       ? client.getApplicationBoxByName(appId, boxName)
       : client.lookupApplicationBoxByIDandName(appId, boxName)
   ).do();
@@ -111,35 +108,33 @@ async function getAccountDetails(
   client: Algodv2 | Indexer,
   addr: string,
 ): Promise<{
-  currentRound?: number;
+  currentRound?: bigint;
   isOnline: boolean;
   holdings: Map<number, bigint>;
 }> {
   const holdings: Map<number, bigint> = new Map();
 
   try {
-    const res = await (
-      client instanceof Algodv2
-        ? client.accountInformation(addr)
-        : client.lookupAccountByID(addr).exclude("apps-local-state,created-apps")
-    ).do();
+    if (isAlgodClient(client)) {
+      const account = await client.accountInformation(addr).do();
 
-    // algod https://developer.algorand.org/docs/rest-apis/algod/#account
-    // indexer https://developer.algorand.org/docs/rest-apis/indexer/#lookupaccountbyid-response-200
-    const account = client instanceof Algodv2 ? res : res["account"];
-    const assets = account["assets"] || [];
+      const assets = account.assets || [];
+      for (const asset of assets) holdings.set(Number(asset.assetId), asset.amount);
+      holdings.set(0, account.amount); // includes min balance
 
-    holdings.set(0, BigInt(account["amount"])); // includes min balance
+      return { isOnline: account.status === "Online", holdings };
+    } else {
+      const { currentRound, account } = await client
+        .lookupAccountByID(addr)
+        .exclude("apps-local-state,created-apps")
+        .do();
 
-    for (const asset of assets) {
-      holdings.set(asset["asset-id"], BigInt(asset["amount"]));
+      const assets = account.assets || [];
+      for (const asset of assets) holdings.set(Number(asset.assetId), asset.amount);
+      holdings.set(0, account.amount); // includes min balance
+
+      return { currentRound, isOnline: account.status === "Online", holdings };
     }
-
-    return {
-      currentRound: res["current-round"],
-      isOnline: account["status"] === "Online",
-      holdings,
-    };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     if (e.status === 404 && e.response?.text?.includes("no accounts found for address")) {
@@ -178,11 +173,13 @@ function getParsedValueFromState(
   encoding: BufferEncoding = "utf8",
 ): string | bigint | undefined {
   const encodedKey: string = encoding ? encodeToBase64(key, encoding) : key;
-  const keyValue: TealKeyValue | undefined = state.find((entry) => entry.key === encodedKey);
+  const keyValue: TealKeyValue | undefined = state.find(
+    (entry) => Buffer.from(entry.key).toString("base64") === encodedKey,
+  );
   if (keyValue === undefined) return;
   const { value } = keyValue;
-  if (value.type === 1) return value.bytes;
-  if (value.type === 2) return BigInt(value.uint);
+  if (value.type === 1) return Buffer.from(value.bytes).toString("base64");
+  if (value.type === 2) return value.uint;
   return;
 }
 
@@ -226,8 +223,8 @@ function addEscrowNoteTransaction(
 ): Transaction {
   const note = Uint8Array.from([...enc.encode(notePrefix), ...decodeAddress(escrowAddr).publicKey]);
   return makePaymentTxnWithSuggestedParamsFromObject({
-    from: userAddr,
-    to: getApplicationAddress(appId),
+    sender: userAddr,
+    receiver: getApplicationAddress(appId),
     amount: 0,
     note,
     suggestedParams: params,
@@ -242,8 +239,8 @@ function removeEscrowNoteTransaction(
 ): Transaction {
   const note = Uint8Array.from([...enc.encode(notePrefix), ...decodeAddress(escrowAddr).publicKey]);
   return makePaymentTxnWithSuggestedParamsFromObject({
-    from: escrowAddr,
-    to: userAddr,
+    sender: escrowAddr,
+    receiver: userAddr,
     amount: 0,
     closeRemainderTo: userAddr,
     note,

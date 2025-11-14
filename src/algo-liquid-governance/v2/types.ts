@@ -1,5 +1,5 @@
 interface DistributorInfo {
-  currentRound?: number; // round the data was read at
+  currentRound?: bigint; // round the data was read at
   dispenserAppId: number; // id of dispenser app which mints gALGO
   premintEnd: bigint; // unix timestamp for the end of the pre-mint period
   commitEnd: bigint; // unix timestamp for end of the commitment period
@@ -10,7 +10,7 @@ interface DistributorInfo {
 }
 
 interface UserCommitmentInfo {
-  currentRound?: number;
+  currentRound?: bigint;
   userAddress: string;
   canDelegate: boolean; // whether voting can be delegated to admin
   premint: bigint; // amount of ALGOs the user has pre-minted and not yet claimed
@@ -19,7 +19,7 @@ interface UserCommitmentInfo {
 }
 
 interface EscrowGovernanceStatus {
-  currentRound?: number;
+  currentRound?: bigint;
   balance: bigint;
   isOnline: boolean;
   status?: {

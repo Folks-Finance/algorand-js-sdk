@@ -23,7 +23,7 @@ import { stakeAndDepositABIContract, xAlgoABIContract } from "./abi-contracts";
 
 import type { ConsensusConfig, ConsensusState } from "./types";
 import type { Pool } from "../lend";
-import type { Algodv2, SuggestedParams, Transaction } from "algosdk";
+import type { Algodv2, SuggestedParams, Transaction, Address, TransactionBoxReference } from "algosdk";
 
 /**
  *
@@ -112,6 +112,8 @@ function prepareDummyTransaction(
   consensusConfig: ConsensusConfig,
   senderAddr: string,
   params: SuggestedParams,
+  foreignAccounts: Address[] = [],
+  boxes: TransactionBoxReference[] = [],
 ): Transaction {
   const atc = new AtomicTransactionComposer();
   atc.addMethodCall({
@@ -120,6 +122,8 @@ function prepareDummyTransaction(
     appID: consensusConfig.consensusAppId,
     method: getMethodByName(xAlgoABIContract.methods, "dummy"),
     methodArgs: [],
+    appAccounts: foreignAccounts,
+    boxes,
     suggestedParams: { ...params, flatFee: true, fee: 1000 },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
@@ -144,13 +148,16 @@ function getTxnsAfterResourceAllocation(
   const appCallTxnIndex = txns.length - 1;
 
   // add xALGO asset and proposers box
-  txns[appCallTxnIndex].appForeignAssets = [xAlgoId];
+  // @ts-expect-error readonly
+  txns[appCallTxnIndex].applicationCall!.foreignAssets = [xAlgoId];
   const box = { appIndex: consensusAppId, name: enc.encode("pr") };
-  const { boxes } = txns[appCallTxnIndex];
+  const { boxes } = txns[appCallTxnIndex].applicationCall!;
   if (boxes) {
+    // @ts-expect-error readonly
     boxes.push(box);
   } else {
-    txns[appCallTxnIndex].boxes = [box];
+    // @ts-expect-error readonly
+    txns[appCallTxnIndex].applicationCall!.boxes = [box];
   }
 
   // get all accounts we need to add
@@ -172,7 +179,8 @@ function getTxnsAfterResourceAllocation(
     }
 
     // add proposer accounts
-    txns[txnIndex].appAccounts = accounts.slice(i, i + 4);
+    // @ts-expect-error readonly
+    txns[txnIndex].applicationCall!.accounts = accounts.slice(i, i + 4);
   }
 
   return txns;
@@ -211,7 +219,7 @@ function prepareImmediateStakeTransactions(
   const { consensusAppId } = consensusConfig;
 
   const sendAlgo = {
-    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId), amount, {
+    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId).toString(), amount, {
       ...params,
       flatFee: true,
       fee: 0,
@@ -272,7 +280,7 @@ function prepareImmediateStakeAndDepositTransactions(
   if (assetId !== xAlgoId) throw Error("xAlgo pool not passed");
 
   const sendAlgo = {
-    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(stakeAndDepositAppId), amount, {
+    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(stakeAndDepositAppId).toString(), amount, {
       ...params,
       flatFee: true,
       fee: 0,
@@ -310,10 +318,10 @@ function prepareImmediateStakeAndDepositTransactions(
   const MAX_FOREIGN_ACCOUNT_PER_TXN = 4;
   const accounts = consensusState.proposersBalances.map(({ address }) => decodeAddress(address));
   for (let i = 0; i < accounts.length; i += MAX_FOREIGN_ACCOUNT_PER_TXN) {
-    txns.unshift(prepareDummyTransaction(consensusConfig, senderAddr, params));
-    txns[0].appAccounts = accounts.slice(i, i + 4);
+    const boxes = i === 0 ? [{ appIndex: BigInt(consensusAppId), name: enc.encode("pr") }] : undefined;
+    const foreignAccounts = accounts.slice(i, i + 4);
+    txns.unshift(prepareDummyTransaction(consensusConfig, senderAddr, params, foreignAccounts, boxes));
   }
-  txns[0].boxes = [{ appIndex: consensusAppId, name: enc.encode("pr") }];
   return txns;
 }
 
@@ -349,7 +357,7 @@ function prepareDelayedStakeTransactions(
   // we rely on caller to check nonce is not already in use for sender address
 
   const sendAlgo = {
-    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId), amount, {
+    txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId).toString(), amount, {
       ...params,
       flatFee: true,
       fee: 0,
@@ -381,7 +389,9 @@ function prepareDelayedStakeTransactions(
   // add box min balance payment if specified
   if (includeBoxMinBalancePayment) {
     const minBalance = BigInt(36100);
-    txns.unshift(transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId), minBalance, params));
+    txns.unshift(
+      transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId).toString(), minBalance, params),
+    );
   }
   return txns;
 }
@@ -457,7 +467,7 @@ function prepareUnstakeTransactions(
   const { consensusAppId, xAlgoId } = consensusConfig;
 
   const sendXAlgo = {
-    txn: transferAlgoOrAsset(xAlgoId, senderAddr, getApplicationAddress(consensusAppId), amount, {
+    txn: transferAlgoOrAsset(xAlgoId, senderAddr, getApplicationAddress(consensusAppId).toString(), amount, {
       ...params,
       flatFee: true,
       fee: 0,

@@ -13,8 +13,9 @@ import type { Indexer } from "algosdk";
  */
 export async function getDispenserInfo(indexerClient: Indexer, dispenser: Dispenser): Promise<DispenserInfo> {
   const { appId } = dispenser;
-  const res = await indexerClient.lookupApplications(appId).do();
-  const state = res["application"]["params"]["global-state"];
+  const { currentRound, application } = await indexerClient.lookupApplications(appId).do();
+  const state = application?.params.globalState;
+  if (!state) throw new Error(`Cannot find global state for app id ${appId}`);
 
   const distributorAppIds = parseUint64s(String(getParsedValueFromState(state, "distribs"))).map((appId) =>
     Number(appId),
@@ -22,7 +23,7 @@ export async function getDispenserInfo(indexerClient: Indexer, dispenser: Dispen
   const isMintingPaused = Boolean(getParsedValueFromState(state, "is_minting_paused") || 0);
 
   return {
-    currentRound: res["current-round"],
+    currentRound,
     distributorAppIds,
     isMintingPaused,
   };

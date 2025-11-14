@@ -41,7 +41,7 @@ interface TinymanLendingPool extends BaseLendingPool {
 type LendingPool = PactLendingPool | TinymanLendingPool;
 
 interface BaseLendingPoolInfo {
-  currentRound?: number;
+  currentRound?: bigint;
   fAsset0Supply: bigint;
   fAsset1Supply: bigint;
   liquidityTokenCirculatingSupply: bigint;
@@ -63,7 +63,7 @@ interface TinymanLendingPoolInfo extends BaseLendingPoolInfo {
 }
 
 interface PoolManagerInfo {
-  currentRound?: number;
+  currentRound?: bigint;
   adminAddress: string;
   pools: Partial<
     Record<
@@ -103,7 +103,7 @@ interface LPTokenPool extends BasePool {
 type Pool = BasePool | LPTokenPool;
 
 interface PoolInfo {
-  currentRound?: number;
+  currentRound?: bigint;
   poolManagerAppId: number;
   poolAdminAddress: string;
   paramsAdminAddress: string;
@@ -155,7 +155,7 @@ interface PoolInfo {
 }
 
 type UserDepositInfo = {
-  currentRound?: number;
+  currentRound?: bigint;
   escrowAddress: string;
   holdings: {
     fAssetId: number;
@@ -164,7 +164,7 @@ type UserDepositInfo = {
 };
 
 type UserDepositFullInfo = {
-  currentRound?: number;
+  currentRound?: bigint;
   escrowAddress: string;
   holdings: {
     fAssetId: number;
@@ -180,7 +180,7 @@ type UserDepositFullInfo = {
 };
 
 interface DepositStakingInfo {
-  currentRound?: number;
+  currentRound?: bigint;
   stakingPrograms: {
     poolAppId: number;
     totalStaked: bigint;
@@ -217,7 +217,7 @@ interface DepositStakingProgramInfo {
 }
 
 interface UserDepositStakingLocalState {
-  currentRound?: number;
+  currentRound?: bigint;
   userAddress: string;
   escrowAddress: string;
   optedIntoAssets: Set<number>;
@@ -247,7 +247,7 @@ interface UserDepositStakingProgramInfo {
 }
 
 interface UserDepositStakingInfo {
-  currentRound?: number;
+  currentRound?: bigint;
   userAddress: string;
   escrowAddress: string;
   optedIntoAssets: Set<number>;
@@ -276,7 +276,7 @@ enum LoanType {
 }
 
 interface LoanInfo {
-  currentRound?: number;
+  currentRound?: bigint;
   adminAddress: string;
   poolManagerAppId: number;
   oracleAdapterAppId: number;
@@ -285,7 +285,7 @@ interface LoanInfo {
 }
 
 interface LoanLocalState {
-  currentRound?: number;
+  currentRound?: bigint;
   userAddress: string;
   escrowAddress: string;
   collaterals: {
@@ -334,7 +334,7 @@ interface UserLoanInfoBorrow {
 }
 
 interface UserLoanInfo {
-  currentRound?: number;
+  currentRound?: bigint;
   userAddress: string;
   escrowAddress: string;
   collaterals: UserLoanInfoCollateral[];
@@ -375,7 +375,7 @@ interface OraclePrice {
 }
 
 interface OraclePrices {
-  currentRound?: number;
+  currentRound?: bigint;
   prices: Partial<Record<number, OraclePrice>>; // assetId -> OraclePrice
 }
 

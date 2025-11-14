@@ -1,4 +1,4 @@
-import { AtomicTransactionComposer, decodeAddress, decodeUint64, encodeAddress, getMethodByName } from "algosdk";
+import { AtomicTransactionComposer, decodeUint64, encodeAddress, getMethodByName } from "algosdk";
 
 import { minimum } from "../math-lib";
 import {
@@ -9,11 +9,11 @@ import {
   signer,
 } from "../utils";
 
-import { lpTokenOracleABIContract, oracleAdapterABIContract } from "./abi-contracts";
+import { oracleAdapterABIContract } from "./abi-contracts";
 import { calcLPPrice } from "./formulae";
 import { LPTokenProvider } from "./types";
 
-import type { LPToken, Oracle, OraclePrice, OraclePrices, PactLPToken, TinymanLPToken } from "./types";
+import type { LPToken, Oracle, OraclePrice, OraclePrices } from "./types";
 import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
 import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
 
@@ -102,15 +102,18 @@ async function getOraclePrices(client: Algodv2 | Indexer, oracle: Oracle, assetI
   // get the assets for which we need to retrieve their prices
   const allAssetIds: number[] = oracleState
     .concat(lpTokenOracleState || [])
+    // remove non asset ids global state
     .filter(({ key }: TealKeyValue) => {
-      // remove non asset ids global state
-      key = Buffer.from(key, "base64").toString("utf8");
-      return key !== "updater_addr" && key !== "admin" && key !== "tinyman_validator_app_id" && key !== "td";
+      const keyParsed = Buffer.from(key).toString("utf8");
+      return (
+        keyParsed !== "updater_addr" &&
+        keyParsed !== "admin" &&
+        keyParsed !== "tinyman_validator_app_id" &&
+        keyParsed !== "td"
+      );
     })
-    .map(({ key }: TealKeyValue) => {
-      // convert key to asset id
-      return decodeUint64(Buffer.from(key, "base64"), "safe");
-    });
+    // convert key to asset id
+    .map(({ key }: TealKeyValue) => decodeUint64(key, "safe"));
   const assets = assetIds ? assetIds : allAssetIds;
 
   // retrieve asset prices
@@ -179,63 +182,9 @@ function prepareRefreshPricesInOracleAdapter(
 ): Transaction[] {
   const { oracleAdapterAppId, lpTokenOracle, oracle0AppId } = oracle;
 
-  if (lpTokenOracle === undefined && lpAssets.length > 0)
-    throw Error("Cannot refresh LP assets without LP Token Oracle");
+  if (lpAssets.length > 0) throw Error("Refresh LP assets unsupported");
 
   const atc = new AtomicTransactionComposer();
-
-  // divide lp tokens into Tinyman and Pact
-  const tinymanLPAssets: TinymanLPToken[] = lpAssets.filter(
-    ({ provider }) => provider === LPTokenProvider.TINYMAN,
-  ) as TinymanLPToken[];
-  const pactLPAssets: PactLPToken[] = lpAssets.filter(
-    ({ provider }) => provider === LPTokenProvider.PACT,
-  ) as PactLPToken[];
-
-  // update lp tokens
-  const foreignAccounts: string[][] = [];
-  const foreignApps: number[][] = [];
-
-  const MAX_TINYMAN_UPDATE = 4;
-  const MAX_PACT_UPDATE = 8;
-  const MAX_COMBINATION_UPDATE = 7;
-  let tinymanIndex = 0;
-  let pactIndex = 0;
-
-  while (tinymanIndex < tinymanLPAssets.length && pactIndex < pactLPAssets.length) {
-    // retrieve which lp assets to update
-    const tinymanLPUpdates = tinymanLPAssets.slice(tinymanIndex, tinymanIndex + MAX_TINYMAN_UPDATE);
-    const maxPactUpdates =
-      tinymanLPUpdates.length === 0 ? MAX_PACT_UPDATE : MAX_COMBINATION_UPDATE - tinymanLPUpdates.length;
-    const pactLPUpdates = pactLPAssets.slice(pactIndex, pactIndex + maxPactUpdates);
-
-    // prepare update lp tokens arguments
-    const lpAssetIds = [
-      ...tinymanLPUpdates.map(({ lpAssetId }) => lpAssetId),
-      ...pactLPUpdates.map(({ lpAssetId }) => lpAssetId),
-    ];
-
-    // foreign arrays
-    foreignAccounts.push(tinymanLPUpdates.map(({ lpPoolAddress }) => lpPoolAddress));
-    const apps: number[] = [];
-    if (tinymanLPUpdates.length > 0) apps.push(lpTokenOracle!.tinymanValidatorAppId);
-    for (const { lpPoolAppId } of pactLPUpdates) apps.push(lpPoolAppId);
-    foreignApps.push(apps);
-
-    // update lp
-    atc.addMethodCall({
-      sender: userAddr,
-      signer,
-      appID: lpTokenOracle!.appId,
-      method: getMethodByName(lpTokenOracleABIContract.methods, "update_lp_tokens"),
-      methodArgs: [lpAssetIds],
-      suggestedParams: { ...params, flatFee: true, fee: 1000 },
-    });
-
-    // increase indexes
-    tinymanIndex += tinymanLPUpdates.length;
-    pactIndex += pactLPUpdates.length;
-  }
 
   // prepare refresh prices arguments
   const oracle1AppId = oracle.oracle1AppId || 0;
@@ -253,11 +202,7 @@ function prepareRefreshPricesInOracleAdapter(
   });
 
   // build
-  return atc.buildGroup().map(({ txn }, index) => {
-    if (index < foreignAccounts.length && index < foreignApps.length) {
-      txn.appAccounts = foreignAccounts[index].map((address) => decodeAddress(address));
-      txn.appForeignApps = foreignApps[index];
-    }
+  return atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
     return txn;
   });
