@@ -31,7 +31,8 @@ type MainnetPoolKey =
   | "WMPL"
   | "ISOLATED_ALGO"
   | "ISOLATED_USDC"
-  | "ISOLATED_TINY";
+  | "ISOLATED_TINY"
+  | "ISOLATED_FOLKS";
 const MainnetPools: Record<MainnetPoolKey, Pool> = {
   ALGO: {
     appId: 971368268,
@@ -293,6 +294,17 @@ const MainnetPools: Record<MainnetPoolKey, Pool> = {
     poolManagerIndex: 21,
     loans: {
       3184333108: BigInt(2),
+    },
+  },
+  ISOLATED_FOLKS: {
+    appId: 3343137163,
+    assetId: 3203964481,
+    fAssetId: 3343139268,
+    frAssetId: 3343139269,
+    assetDecimals: 6,
+    poolManagerIndex: 22,
+    loans: {
+      3184333108: BigInt(3),
     },
   },
 };
