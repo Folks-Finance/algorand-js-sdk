@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- [#98](https://github.com/Folks-Finance/algorand-js-sdk/pull/98) [`ba81f4a`](https://github.com/Folks-Finance/algorand-js-sdk/commit/ba81f4acf3ea181ba85c44594b016a30f7377ef3) Thanks [@gidonkatten](https://github.com/gidonkatten)! - migrate to algosdk v3
+
 ## 0.1.11
 
 ### Patch Changes
