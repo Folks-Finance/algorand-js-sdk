@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.2.1
+
+### Patch Changes
+
+- [#100](https://github.com/Folks-Finance/algorand-js-sdk/pull/100) [`821c18a`](https://github.com/Folks-Finance/algorand-js-sdk/commit/821c18a1fba5455869bdaf63fae5df6a0fbd317f) Thanks [@gidonkatten](https://github.com/gidonkatten)! - added isolated folks pool
+
 ## 0.2.0
 
 ### Minor Changes
