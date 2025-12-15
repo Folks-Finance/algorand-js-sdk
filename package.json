@@ -22,17 +22,19 @@
     "example": "pnpx tsx",
     "release": "pnpm build && changeset publish"
   },
-  "dependencies": {
-    "@algorandfoundation/algokit-utils": "^9.1.2",
-    "algosdk": "^3.5.2"
+  "peerDependencies": {
+    "@algorandfoundation/algokit-utils": "^9.0.0",
+    "algosdk": "^3.0.0"
   },
   "devDependencies": {
+    "@algorandfoundation/algokit-utils": "^9.1.2",
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.10",
     "@eslint/js": "^9.16.0",
     "@types/node": "^22.10.1",
     "@typescript-eslint/parser": "^8.18.0",
     "@typhonjs-typedoc/typedoc-theme-dmt": "^0.3.0",
+    "algosdk": "^3.5.2",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.7.0",
