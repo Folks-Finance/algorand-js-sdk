@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.2.2
+
+### Patch Changes
+
+- [#103](https://github.com/Folks-Finance/algorand-js-sdk/pull/103) [`98d717b`](https://github.com/Folks-Finance/algorand-js-sdk/commit/98d717b417a99db477edbe608ce1c80a4420ce59) Thanks [@palace22](https://github.com/palace22)! - Added peer deps
+
 ## 0.2.1
 
 ### Patch Changes
