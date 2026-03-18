@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.2.3
+
+### Patch Changes
+
+- [#105](https://github.com/Folks-Finance/algorand-js-sdk/pull/105) [`ed6b561`](https://github.com/Folks-Finance/algorand-js-sdk/commit/ed6b56147c149688259e51c5ee037e866bc77dc8) Thanks [@gidonkatten](https://github.com/gidonkatten)! - bump dependecies
+
 ## 0.2.2
 
 ### Patch Changes
