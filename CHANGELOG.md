@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.2.4
+
+### Patch Changes
+
+- [#107](https://github.com/Folks-Finance/algorand-js-sdk/pull/107) [`c0875b8`](https://github.com/Folks-Finance/algorand-js-sdk/commit/c0875b89ecf96561d8831096d5e45f7f130f4b2d) Thanks [@palace22](https://github.com/palace22)! - Added WBTC and WETH NTT
+
 ## 0.2.3
 
 ### Patch Changes
