@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.2.5
+
+### Patch Changes
+
+- [#109](https://github.com/Folks-Finance/algorand-js-sdk/pull/109) [`5604637`](https://github.com/Folks-Finance/algorand-js-sdk/commit/5604637bbb4c47edabbf7dc997889c7ca7e0b27f) Thanks [@gidonkatten](https://github.com/gidonkatten)! - remove deprecated wormhole tokens from lending pools
+
 ## 0.2.4
 
 ### Patch Changes
