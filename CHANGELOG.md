@@ -1,5 +1,11 @@
 # @folks-finance/algorand-sdk
 
+## 0.2.6
+
+### Patch Changes
+
+- [#111](https://github.com/Folks-Finance/algorand-js-sdk/pull/111) [`1c0281e`](https://github.com/Folks-Finance/algorand-js-sdk/commit/1c0281ecae202b88329f032a703ea052cadb2fd1) Thanks [@gidonkatten](https://github.com/gidonkatten)! - added new ntt lending pools
+
 ## 0.2.5
 
 ### Patch Changes
