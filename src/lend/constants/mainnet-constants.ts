@@ -359,6 +359,8 @@ type MainnetLendingPoolKey =
   | "xALGOUSDCPLP"
   | "xALGOUSDCTM"
   | "tALGOUSDCTM"
+  | "USDCwBTCNTTTM"
+  | "USDCwETHNTTTM"
   | "USDCGOLDPLP"
   | "USDCSILVERPLP";
 const MainnetLendingPools: Record<MainnetLendingPoolKey, LendingPool> = {
@@ -500,6 +502,26 @@ const MainnetLendingPools: Record<MainnetLendingPoolKey, LendingPool> = {
     pool1AppId: 971372237,
     asset0Id: 2537013734,
     asset1Id: 31566704,
+    feeScale: ONE_4_DP,
+  },
+  USDCwBTCNTTTM: {
+    provider: LPTokenProvider.TINYMAN,
+    lpPoolAppAddress: "3PR5Z3IYPUM66FSLLJ44GZZZMN534O3JUDLOZYDQKIJRIYQZ3NJMG2HVQY",
+    lpAssetId: 1394237139,
+    pool0AppId: 971372237,
+    pool1AppId: 3514794123,
+    asset0Id: 31566704,
+    asset1Id: 3495558025,
+    feeScale: ONE_4_DP,
+  },
+  USDCwETHNTTTM: {
+    provider: LPTokenProvider.TINYMAN,
+    lpPoolAppAddress: "63EYPMHHLV43ZHRBWDAKHRHWFDB7II2LTVCFMPDF5BNGL4UK7ZVMKHUORM",
+    lpAssetId: 1734424720,
+    pool0AppId: 971372237,
+    pool1AppId: 3514795114,
+    asset0Id: 31566704,
+    asset1Id: 3495722210,
     feeScale: ONE_4_DP,
   },
   USDCGOLDPLP: {
