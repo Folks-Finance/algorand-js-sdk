@@ -15,9 +15,11 @@ import {
   getAccountApplicationLocalState,
   getApplicationGlobalState,
   getParsedValueFromState,
+  MIN_FEE,
   removeEscrowNoteTransaction,
   signer,
   transferAlgoOrAsset,
+  USER_TXN_FEE,
 } from "../utils";
 
 import { loanABIContract, poolABIContract } from "./abi-contracts";
@@ -374,7 +376,7 @@ function prepareCreateUserLoan(
   const userCall = addEscrowNoteTransaction(userAddr, escrow.addr.toString(), loanAppId, "la ", {
     ...params,
     flatFee: true,
-    fee: 2000,
+    fee: USER_TXN_FEE + MIN_FEE,
   });
 
   const atc = new AtomicTransactionComposer();
@@ -427,7 +429,7 @@ function prepareAddCollateralToLoan(
     appID: loanAppId,
     method: getMethodByName(loanABIContract.methods, "add_collateral"),
     methodArgs: [escrowAddr, fAssetId, poolAppId, poolManagerIndex, poolLoanIndex, poolManagerAppId],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -480,7 +482,7 @@ function prepareSyncCollateralInLoan(
       poolManagerAppId,
       oracleAdapterAppId,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 1000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -544,7 +546,7 @@ function prepareReduceCollateralFromLoan(
       poolManagerAppId,
       oracleAdapterAppId,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 6000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 5 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -601,7 +603,7 @@ function prepareSwapCollateralInLoanBegin(
       poolAppId,
       poolManagerAppId,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 6000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 5 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -651,7 +653,7 @@ function prepareSwapCollateralInLoanEnd(
       poolManagerAppId,
       oracleAdapterAppId,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 1000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -687,7 +689,7 @@ function prepareRemoveCollateralFromLoan(
     appID: loanAppId,
     method: getMethodByName(loanABIContract.methods, "remove_collateral"),
     methodArgs: [escrowAddr, fAssetId, poolAppId],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -755,7 +757,7 @@ function prepareBorrowFromLoan(
       poolManagerAppId,
       oracleAdapterAppId,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 8000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 7 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -795,7 +797,7 @@ function prepareSwitchBorrowTypeInLoan(
     appID: loanAppId,
     method: getMethodByName(loanABIContract.methods, "switch_borrow_type"),
     methodArgs: [escrowAddr, assetId, maxStableRate, poolAppId, poolManagerAppId],
-    suggestedParams: { ...params, flatFee: true, fee: 6000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 5 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -837,7 +839,7 @@ function prepareRepayLoanWithTxn(
   const sendAsset = transferAlgoOrAsset(assetId, userAddr, getApplicationAddress(poolAppId).toString(), repayAmount, {
     ...params,
     flatFee: true,
-    fee: 0,
+    fee: USER_TXN_FEE,
   });
 
   const atc = new AtomicTransactionComposer();
@@ -857,7 +859,7 @@ function prepareRepayLoanWithTxn(
       poolAppId,
       poolManagerAppId,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 10000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 8 * MIN_FEE },
   });
   return atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -913,7 +915,7 @@ function prepareRepayLoanWithCollateral(
       poolAppId,
       poolManagerAppId,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 14000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 13 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -972,7 +974,7 @@ function prepareLiquidateLoan(
     {
       ...params,
       flatFee: true,
-      fee: 0,
+      fee: USER_TXN_FEE,
     },
   );
 
@@ -996,7 +998,7 @@ function prepareLiquidateLoan(
       poolManagerAppId,
       oracleAdapterAppId,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 10000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 8 * MIN_FEE },
   });
   return atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -1033,7 +1035,7 @@ function prepareRebalanceUpLoan(
     appID: loanAppId,
     method: getMethodByName(loanABIContract.methods, "rebalance_up"),
     methodArgs: [escrowAddr, assetId, poolAppId, poolManagerAppId],
-    suggestedParams: { ...params, flatFee: true, fee: 5000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 4 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -1071,7 +1073,7 @@ function prepareRebalanceDownLoan(
     appID: loanAppId,
     method: getMethodByName(loanABIContract.methods, "rebalance_down"),
     methodArgs: [escrowAddr, assetId, poolAppId, poolManagerAppId],
-    suggestedParams: { ...params, flatFee: true, fee: 5000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 4 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -1103,7 +1105,7 @@ function prepareRemoveUserLoan(
     appID: loanAppId,
     method: getMethodByName(loanABIContract.methods, "remove_loan"),
     methodArgs: [escrowAddr],
-    suggestedParams: { ...params, flatFee: true, fee: 4000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 3 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -1148,7 +1150,7 @@ function prepareFlashLoanBegin(
     appID: appId,
     method: getMethodByName(poolABIContract.methods, "flash_loan_begin"),
     methodArgs: [borrowAmount, txnIndexForFlashLoanEnd, receiverAddr, assetId],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -1181,7 +1183,7 @@ function prepareFlashLoanEnd(
   const sendAsset = transferAlgoOrAsset(assetId, userAddr, getApplicationAddress(appId).toString(), repaymentAmount, {
     ...params,
     flatFee: true,
-    fee: 0,
+    fee: USER_TXN_FEE,
   });
 
   const atc = new AtomicTransactionComposer();
@@ -1191,7 +1193,7 @@ function prepareFlashLoanEnd(
     appID: appId,
     method: getMethodByName(poolABIContract.methods, "flash_loan_end"),
     methodArgs: [{ txn: sendAsset, signer }, reserveAddr, assetId],
-    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   return atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;

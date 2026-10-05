@@ -5,8 +5,10 @@ import {
   makePaymentTxnWithSuggestedParamsFromObject,
 } from "algosdk";
 
-import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
-import type { Box, TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import type { Algodv2, Indexer, SuggestedParams, Transaction, modelsv2 } from "algosdk";
+
+type Box = modelsv2.Box;
+type TealKeyValue = modelsv2.TealKeyValue;
 
 const enc = new TextEncoder();
 
@@ -50,6 +52,10 @@ function unixTime(): number {
 
 const PAYOUTS_GO_ONLINE_FEE = BigInt(2e6);
 
+const MIN_FEE = 1000; // per txn, including inner txns
+const PQ_FEE_PREMIUM = 2000; // extra for falcon-signed txns
+const USER_TXN_FEE = MIN_FEE + PQ_FEE_PREMIUM; // fee for each txn sent by the user
+
 /**
  * Wraps a call to Algorand client (algod/indexer) and returns global state
  */
@@ -62,7 +68,7 @@ async function getApplicationGlobalState(
 }> {
   if (isAlgodClient(client)) {
     const res = await client.getApplicationByID(appId).do();
-    return { globalState: res.params.globalState };
+    return { globalState: res.params?.globalState };
   } else {
     const { currentRound, application } = await client.lookupApplications(appId).do();
     return { currentRound, globalState: application?.params.globalState };
@@ -253,6 +259,8 @@ export {
   transferAlgoOrAsset,
   signer,
   PAYOUTS_GO_ONLINE_FEE,
+  MIN_FEE,
+  USER_TXN_FEE,
   unixTime,
   getApplicationGlobalState,
   getAccountApplicationLocalState,

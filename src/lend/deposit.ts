@@ -16,11 +16,13 @@ import {
   getAccountDetails,
   getApplicationGlobalState,
   getParsedValueFromState,
+  MIN_FEE,
   parseBitsAsBooleans,
   parseUint64s,
   removeEscrowNoteTransaction,
   signer,
   transferAlgoOrAsset,
+  USER_TXN_FEE,
 } from "../utils";
 
 import { depositsABIContract, poolABIContract } from "./abi-contracts";
@@ -305,7 +307,7 @@ function prepareAddDepositEscrowToDeposits(
   const userCall = addEscrowNoteTransaction(userAddr, escrow.addr.toString(), depositsAppId, "da ", {
     ...params,
     flatFee: true,
-    fee: 2000,
+    fee: USER_TXN_FEE + MIN_FEE,
   });
 
   const atc = new AtomicTransactionComposer();
@@ -355,7 +357,7 @@ function prepareOptDepositEscrowIntoAssetInDeposits(
     appID: depositsAppId,
     method: getMethodByName(depositsABIContract.methods, "opt_escrow_into_asset"),
     methodArgs: [escrowAddr, poolManagerAppId, poolAppId, fAssetId, poolManagerIndex],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -391,7 +393,7 @@ function prepareDepositIntoPool(
   const sendAsset = transferAlgoOrAsset(assetId, userAddr, getApplicationAddress(appId).toString(), assetAmount, {
     ...params,
     flatFee: true,
-    fee: 0,
+    fee: USER_TXN_FEE,
   });
 
   const atc = new AtomicTransactionComposer();
@@ -401,7 +403,7 @@ function prepareDepositIntoPool(
     appID: appId,
     method: getMethodByName(poolABIContract.methods, "deposit"),
     methodArgs: [{ txn: sendAsset, signer }, receiverAddr, assetId, fAssetId, poolManagerAppId],
-    suggestedParams: { ...params, flatFee: true, fee: 4000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 2 * MIN_FEE },
     note,
   });
   return atc.buildGroup().map(({ txn }) => {
@@ -458,7 +460,7 @@ function prepareWithdrawFromDepositEscrowInDeposits(
       remainDeposited,
       poolManagerIndex,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: remainDeposited ? 2000 : 6000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + (remainDeposited ? 1 : 5) * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -499,7 +501,7 @@ function prepareWithdrawFromPool(
     {
       ...params,
       flatFee: true,
-      fee: 0,
+      fee: USER_TXN_FEE,
     },
   );
 
@@ -510,7 +512,7 @@ function prepareWithdrawFromPool(
     appID: poolAppId,
     method: getMethodByName(poolABIContract.methods, "withdraw"),
     methodArgs: [{ txn: sendfAsset, signer }, receivedAssetAmount, receiverAddr, assetId, fAssetId, poolManagerAppId],
-    suggestedParams: { ...params, flatFee: true, fee: 5000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 3 * MIN_FEE },
   });
   return atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -543,7 +545,7 @@ function prepareUpdatePoolInterestIndexes(
     appID: appId,
     method: getMethodByName(poolABIContract.methods, "update_pool_interest_indexes"),
     methodArgs: [poolManagerAppId],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -579,7 +581,7 @@ function prepareOptOutDepositEscrowFromAssetInDeposits(
     appID: depositsAppId,
     method: getMethodByName(depositsABIContract.methods, "close_out_escrow_from_asset"),
     methodArgs: [escrowAddr, getApplicationAddress(poolAppId), fAssetId],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -611,7 +613,7 @@ function prepareRemoveDepositEscrowFromDeposits(
     appID: depositsAppId,
     method: getMethodByName(depositsABIContract.methods, "remove_deposit_escrow"),
     methodArgs: [escrowAddr],
-    suggestedParams: { ...params, flatFee: true, fee: 4000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 3 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;

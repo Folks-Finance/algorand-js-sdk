@@ -18,9 +18,11 @@ import {
   getAccountDetails,
   getApplicationGlobalState,
   getParsedValueFromState,
+  MIN_FEE,
   PAYOUTS_GO_ONLINE_FEE,
   signer,
   transferAlgoOrAsset,
+  USER_TXN_FEE,
 } from "../../utils";
 
 import { abiDistributor } from "./constants/abi-contracts";
@@ -204,7 +206,7 @@ function prepareAddLiquidGovernanceEscrowTransactions(
   const userCall = addEscrowNoteTransaction(userAddr, escrow.address().toString(), appId, "ga ", {
     ...params,
     flatFee: true,
-    fee: 2000,
+    fee: USER_TXN_FEE + MIN_FEE,
   });
 
   const atc = new AtomicTransactionComposer();
@@ -253,7 +255,11 @@ function prepareMintTransactions(
   const escrowAddr = getDistributorLogicSig(senderAddr).address();
 
   const sendAlgo = {
-    txn: transferAlgoOrAsset(0, senderAddr, escrowAddr.toString(), amount, { ...params, flatFee: true, fee: 0 }),
+    txn: transferAlgoOrAsset(0, senderAddr, escrowAddr.toString(), amount, {
+      ...params,
+      flatFee: true,
+      fee: USER_TXN_FEE,
+    }),
     signer,
   };
 
@@ -264,7 +270,7 @@ function prepareMintTransactions(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "mint"),
     methodArgs: [sendAlgo, escrowAddr, dispenser.appId, dispenser.gAlgoId, ensureCommit],
-    suggestedParams: { ...params, flatFee: true, fee: 4000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 2 * MIN_FEE },
     note,
   });
   return atc.buildGroup().map(({ txn }) => {
@@ -301,7 +307,7 @@ function prepareUnmintPremintTransaction(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "unmint_premint"),
     methodArgs: [escrowAddr, amount],
-    suggestedParams: { ...params, flatFee: true, fee: 4000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 3 * MIN_FEE },
     note,
   });
   return atc.buildGroup().map(({ txn }) => {
@@ -337,7 +343,7 @@ function prepareUnmintTransactions(
     txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId).toString(), amount, {
       ...params,
       flatFee: true,
-      fee: 0,
+      fee: USER_TXN_FEE,
     }),
     signer,
   };
@@ -349,7 +355,7 @@ function prepareUnmintTransactions(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "unmint"),
     methodArgs: [sendgALGO, escrowAddr, dispenser.appId],
-    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
     note,
   });
   return atc.buildGroup().map(({ txn }) => {
@@ -386,7 +392,7 @@ function prepareClaimPremintTransaction(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "claim_premint"),
     methodArgs: [escrowAddr, receiverAddr, dispenser.appId, dispenser.gAlgoId],
-    suggestedParams: { ...params, flatFee: true, fee: 4000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 3 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -433,7 +439,7 @@ function prepareRegisterEscrowOnlineTransactions(
     txn: transferAlgoOrAsset(0, senderAddr, escrowAddr.toString(), registerFeeAmount, {
       ...params,
       flatFee: true,
-      fee: 0,
+      fee: USER_TXN_FEE,
     }),
     signer,
   };
@@ -454,7 +460,7 @@ function prepareRegisterEscrowOnlineTransactions(
       voteLastRound,
       voteKeyDilution,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   return atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -485,7 +491,7 @@ function prepareRegisterEscrowOfflineTransaction(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "register_offline"),
     methodArgs: [escrowAddr],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -521,7 +527,7 @@ function prepareCommitOrVoteTransaction(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "governance"),
     methodArgs: [escrowAddr, destAddr, note],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -557,7 +563,7 @@ function prepareRemoveLiquidGovernanceEscrowTransactions(
     method: getMethodByName(abiDistributor.methods, "remove_escrow"),
     methodArgs: [escrowAddr],
     appAccounts: [ownerAddr],
-    suggestedParams: { ...params, flatFee: true, fee: 5000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 4 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -595,7 +601,7 @@ function prepareBurnTransactions(
     txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId).toString(), amount, {
       ...params,
       flatFee: true,
-      fee: 0,
+      fee: USER_TXN_FEE,
     }),
     signer,
   };
@@ -607,7 +613,7 @@ function prepareBurnTransactions(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "burn"),
     methodArgs: [sendgALGO, dispenser.appId],
-    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   return atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -639,7 +645,7 @@ async function prepareCloseOutEscrowTransactions(
       sender: senderAddr,
       receiver: escrow.address(),
       amount: 0,
-      suggestedParams: { ...params, flatFee: true, fee: 2000 },
+      suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
       note: enc.encode("register offline"),
     });
     const registerOffline = makeKeyRegistrationTxnWithSuggestedParamsFromObject({
@@ -653,7 +659,7 @@ async function prepareCloseOutEscrowTransactions(
     sender: senderAddr,
     receiver: escrow.address(),
     amount: 0,
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
     note: enc.encode("close out"),
   });
   const closeOut = makePaymentTxnWithSuggestedParamsFromObject({

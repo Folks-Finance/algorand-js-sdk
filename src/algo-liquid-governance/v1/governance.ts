@@ -6,7 +6,7 @@ import {
   makeApplicationOptInTxnFromObject,
 } from "algosdk";
 
-import { getParsedValueFromState, signer, transferAlgoOrAsset } from "../../utils";
+import { getParsedValueFromState, MIN_FEE, signer, transferAlgoOrAsset, USER_TXN_FEE } from "../../utils";
 
 import { abiDistributor } from "./constants/abi-contracts";
 
@@ -125,7 +125,7 @@ function prepareMintTransactions(
   const payment = {
     txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(distributor.appId).toString(), amount, {
       ...params,
-      fee: 0,
+      fee: USER_TXN_FEE,
       flatFee: true,
     }),
     signer,
@@ -136,7 +136,7 @@ function prepareMintTransactions(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "mint"),
     methodArgs: [payment, dispenser.gAlgoId, dispenser.appId],
-    suggestedParams: { ...params, flatFee: true, fee: 4000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 2 * MIN_FEE },
     note,
   });
 
@@ -150,7 +150,7 @@ function prepareMintTransactions(
       makeApplicationOptInTxnFromObject({
         sender: senderAddr,
         appIndex: distributor.appId,
-        suggestedParams: { ...params, fee: 1000, flatFee: true },
+        suggestedParams: { ...params, fee: USER_TXN_FEE, flatFee: true },
       }),
     );
   return assignGroupID(txns);
@@ -184,7 +184,7 @@ function prepareUnmintPremintTransaction(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "unmint_premint"),
     methodArgs: [amount, dispenser.appId],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
     note,
   });
   const txns = atc.buildGroup().map(({ txn }) => {
@@ -219,7 +219,7 @@ function prepareUnmintTransactions(
   const assetTransfer = {
     txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId).toString(), amount, {
       ...params,
-      fee: 0,
+      fee: USER_TXN_FEE,
       flatFee: true,
     }),
     signer,
@@ -230,7 +230,7 @@ function prepareUnmintTransactions(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "unmint"),
     methodArgs: [assetTransfer, dispenser.appId],
-    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
     note,
   });
 
@@ -267,7 +267,7 @@ function prepareClaimPremintTransaction(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "claim_premint"),
     methodArgs: [receiverAddr, dispenser.gAlgoId, dispenser.appId],
-    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 2 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -299,7 +299,7 @@ function prepareBurnTransactions(
   const assetTransfer = {
     txn: transferAlgoOrAsset(dispenser.gAlgoId, senderAddr, getApplicationAddress(dispenser.appId).toString(), amount, {
       ...params,
-      fee: 0,
+      fee: USER_TXN_FEE,
       flatFee: true,
     }),
     signer,
@@ -310,7 +310,7 @@ function prepareBurnTransactions(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "burn"),
     methodArgs: [assetTransfer, dispenser.appId],
-    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
 
   const txns = atc.buildGroup().map(({ txn }) => {
@@ -347,7 +347,7 @@ function prepareEarlyClaimGovernanceRewardsTransaction(
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "early_claim_rewards"),
     methodArgs: [amount, dispenser.gAlgoId, dispenser.appId],
-    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 2 * MIN_FEE },
   });
 
   const txns = atc.buildGroup().map(({ txn }) => {
@@ -379,7 +379,7 @@ function prepareClaimGovernanceRewardsTransaction(
     signer,
     appID: distributor.appId,
     method: getMethodByName(abiDistributor.methods, "claim_rewards"),
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
