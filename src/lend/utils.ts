@@ -39,8 +39,9 @@ import type {
   UserLoanInfoBorrow,
   UserLoanInfoCollateral,
 } from "./types";
-import type { Indexer } from "algosdk";
-import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import type { Indexer, modelsv2 } from "algosdk";
+
+type TealKeyValue = modelsv2.TealKeyValue;
 
 export async function getEscrows(
   indexerClient: Indexer,
