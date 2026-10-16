@@ -507,7 +507,7 @@ const MainnetLendingPools: Record<MainnetLendingPoolKey, LendingPool> = {
   USDCwBTCNTTTM: {
     provider: LPTokenProvider.TINYMAN,
     lpPoolAppAddress: "3PR5Z3IYPUM66FSLLJ44GZZZMN534O3JUDLOZYDQKIJRIYQZ3NJMG2HVQY",
-    lpAssetId: 1394237139,
+    lpAssetId: 3565167633,
     pool0AppId: 3514794123,
     pool1AppId: 971372237,
     asset0Id: 3495558025,
@@ -517,7 +517,7 @@ const MainnetLendingPools: Record<MainnetLendingPoolKey, LendingPool> = {
   USDCwETHNTTTM: {
     provider: LPTokenProvider.TINYMAN,
     lpPoolAppAddress: "63EYPMHHLV43ZHRBWDAKHRHWFDB7II2LTVCFMPDF5BNGL4UK7ZVMKHUORM",
-    lpAssetId: 1734424720,
+    lpAssetId: 3565169600,
     pool0AppId: 3514795114,
     pool1AppId: 971372237,
     asset0Id: 3495722210,
