@@ -14,8 +14,9 @@ import { calcLPPrice } from "./formulae";
 import { LPTokenProvider } from "./types";
 
 import type { LPToken, Oracle, OraclePrice, OraclePrices } from "./types";
-import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
-import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import type { Algodv2, Indexer, SuggestedParams, Transaction, modelsv2 } from "algosdk";
+
+type TealKeyValue = modelsv2.TealKeyValue;
 
 function parseOracleValue(base64Value: string) {
   const value = Buffer.from(base64Value, "base64").toString("hex");

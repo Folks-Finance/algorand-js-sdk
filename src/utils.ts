@@ -5,8 +5,10 @@ import {
   makePaymentTxnWithSuggestedParamsFromObject,
 } from "algosdk";
 
-import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
-import type { Box, TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import type { Algodv2, Indexer, SuggestedParams, Transaction, modelsv2 } from "algosdk";
+
+type Box = modelsv2.Box;
+type TealKeyValue = modelsv2.TealKeyValue;
 
 const enc = new TextEncoder();
 
@@ -62,7 +64,7 @@ async function getApplicationGlobalState(
 }> {
   if (isAlgodClient(client)) {
     const res = await client.getApplicationByID(appId).do();
-    return { globalState: res.params.globalState };
+    return { globalState: res.params?.globalState };
   } else {
     const { currentRound, application } = await client.lookupApplications(appId).do();
     return { currentRound, globalState: application?.params.globalState };
