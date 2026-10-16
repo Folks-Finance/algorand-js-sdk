@@ -15,9 +15,11 @@ import {
   getAccountDetails,
   getApplicationGlobalState,
   getParsedValueFromState,
+  MIN_FEE,
   removeEscrowNoteTransaction,
   signer,
   unixTime,
+  USER_TXN_FEE,
 } from "../utils";
 
 import { depositStakingABIContract } from "./abi-contracts";
@@ -186,7 +188,7 @@ function prepareAddDepositStakingEscrow(
   const userCall = addEscrowNoteTransaction(userAddr, escrow.addr.toString(), depositStakingAppId, "fa ", {
     ...params,
     flatFee: true,
-    fee: 2000,
+    fee: USER_TXN_FEE + MIN_FEE,
   });
 
   const atc = new AtomicTransactionComposer();
@@ -238,7 +240,7 @@ function prepareOptDepositStakingEscrowIntoAsset(
     appID: depositStakingAppId,
     method: getMethodByName(depositStakingABIContract.methods, "opt_escrow_into_asset"),
     methodArgs: [escrowAddr, poolAppId, fAssetId, stakeIndex],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -276,7 +278,7 @@ function prepareSyncStakeInDepositStakingEscrow(
     appID: depositStakingAppId,
     method: getMethodByName(depositStakingABIContract.methods, "sync_stake"),
     methodArgs: [escrowAddr, poolAppId, fAssetId, stakeIndex],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -315,7 +317,7 @@ function prepareClaimRewardsOfDepositStakingEscrow(
     method: getMethodByName(depositStakingABIContract.methods, "claim_rewards"),
     methodArgs: [escrowAddr, receiverAddr, stakeIndex],
     appForeignAssets: rewardAssetIds,
-    suggestedParams: { ...params, flatFee: true, fee: 4000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 3 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -374,7 +376,7 @@ function prepareWithdrawFromDepositStakingEscrow(
       remainDeposited,
       stakeIndex,
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 6000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 5 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -410,7 +412,7 @@ function prepareOptOutDepositStakingEscrowFromAsset(
     appID: depositStakingAppId,
     method: getMethodByName(depositStakingABIContract.methods, "close_out_escrow_from_asset"),
     methodArgs: [escrowAddr, getApplicationAddress(poolAppId), fAssetId],
-    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 2 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -442,7 +444,7 @@ function prepareRemoveDepositStakingEscrow(
     appID: depositStakingAppId,
     method: getMethodByName(depositStakingABIContract.methods, "remove_f_staking_escrow"),
     methodArgs: [escrowAddr],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 3 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -451,9 +453,9 @@ function prepareRemoveDepositStakingEscrow(
   const optOutTx = makeApplicationCloseOutTxnFromObject({
     sender: escrowAddr,
     appIndex: depositStakingAppId,
-    suggestedParams: params,
+    suggestedParams: { ...params, flatFee: true, fee: 0 },
   });
-  const closeToTx = removeEscrowNoteTransaction(escrowAddr, userAddr, "fr ", params);
+  const closeToTx = removeEscrowNoteTransaction(escrowAddr, userAddr, "fr ", { ...params, flatFee: true, fee: 0 });
   return [txns[0], optOutTx, closeToTx];
 }
 
