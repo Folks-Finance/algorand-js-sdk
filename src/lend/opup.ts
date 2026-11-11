@@ -1,5 +1,7 @@
 import { encodeUint64, makeApplicationNoOpTxnFromObject } from "algosdk";
 
+import { MIN_FEE, USER_TXN_FEE } from "../utils";
+
 import type { OpUp } from "./types";
 import type { SuggestedParams, Transaction } from "algosdk";
 
@@ -28,7 +30,7 @@ function prefixWithOpUp(
   }
 
   const { callerAppId, baseAppId } = opup;
-  const fee = (numInnerTransactions + 1) * 1000;
+  const fee = USER_TXN_FEE + numInnerTransactions * MIN_FEE;
   const prefix = makeApplicationNoOpTxnFromObject({
     sender: userAddr,
     appIndex: callerAppId,

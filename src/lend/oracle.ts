@@ -7,6 +7,7 @@ import {
   getApplicationGlobalState,
   getParsedValueFromState,
   signer,
+  USER_TXN_FEE,
 } from "../utils";
 
 import { oracleAdapterABIContract } from "./abi-contracts";
@@ -14,8 +15,9 @@ import { calcLPPrice } from "./formulae";
 import { LPTokenProvider } from "./types";
 
 import type { LPToken, Oracle, OraclePrice, OraclePrices } from "./types";
-import type { Algodv2, Indexer, SuggestedParams, Transaction } from "algosdk";
-import type { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
+import type { Algodv2, Indexer, SuggestedParams, Transaction, modelsv2 } from "algosdk";
+
+type TealKeyValue = modelsv2.TealKeyValue;
 
 function parseOracleValue(base64Value: string) {
   const value = Buffer.from(base64Value, "base64").toString("hex");
@@ -198,7 +200,7 @@ function prepareRefreshPricesInOracleAdapter(
     appID: oracleAdapterAppId,
     method: getMethodByName(oracleAdapterABIContract.methods, "refresh_prices"),
     methodArgs: [lpAssetIds, baseAssetIds, oracle0AppId, oracle1AppId, lpTokenOracleAppId],
-    suggestedParams: { ...params, flatFee: true, fee: 1000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE },
   });
 
   // build

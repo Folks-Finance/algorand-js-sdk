@@ -13,10 +13,12 @@ import {
   getApplicationBox,
   getApplicationGlobalState,
   getParsedValueFromState,
+  MIN_FEE,
   parseUint64s,
   PAYOUTS_GO_ONLINE_FEE,
   signer,
   transferAlgoOrAsset,
+  USER_TXN_FEE,
 } from "../utils";
 
 import { stakeAndDepositABIContract, xAlgoABIContract } from "./abi-contracts";
@@ -124,7 +126,7 @@ function prepareDummyTransaction(
     methodArgs: [],
     appAccounts: foreignAccounts,
     boxes,
-    suggestedParams: { ...params, flatFee: true, fee: 1000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -222,11 +224,11 @@ function prepareImmediateStakeTransactions(
     txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId).toString(), amount, {
       ...params,
       flatFee: true,
-      fee: 0,
+      fee: USER_TXN_FEE,
     }),
     signer,
   };
-  const fee = 1000 * (3 + consensusState.proposersBalances.length);
+  const fee = USER_TXN_FEE + MIN_FEE * (1 + consensusState.proposersBalances.length);
 
   const atc = new AtomicTransactionComposer();
   atc.addMethodCall({
@@ -283,11 +285,11 @@ function prepareImmediateStakeAndDepositTransactions(
     txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(stakeAndDepositAppId).toString(), amount, {
       ...params,
       flatFee: true,
-      fee: 0,
+      fee: USER_TXN_FEE,
     }),
     signer,
   };
-  const fee = 1000 * (9 + consensusState.proposersBalances.length);
+  const fee = USER_TXN_FEE + MIN_FEE * (7 + consensusState.proposersBalances.length);
 
   const atc = new AtomicTransactionComposer();
   atc.addMethodCall({
@@ -360,11 +362,11 @@ function prepareDelayedStakeTransactions(
     txn: transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId).toString(), amount, {
       ...params,
       flatFee: true,
-      fee: 0,
+      fee: USER_TXN_FEE,
     }),
     signer,
   };
-  const fee = 1000 * (2 + consensusState.proposersBalances.length);
+  const fee = USER_TXN_FEE + MIN_FEE * consensusState.proposersBalances.length;
 
   const atc = new AtomicTransactionComposer();
   const boxName = Uint8Array.from([...enc.encode("dm"), ...decodeAddress(senderAddr).publicKey, ...nonce]);
@@ -390,7 +392,11 @@ function prepareDelayedStakeTransactions(
   if (includeBoxMinBalancePayment) {
     const minBalance = BigInt(36100);
     txns.unshift(
-      transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId).toString(), minBalance, params),
+      transferAlgoOrAsset(0, senderAddr, getApplicationAddress(consensusAppId).toString(), minBalance, {
+        ...params,
+        flatFee: true,
+        fee: USER_TXN_FEE,
+      }),
     );
   }
   return txns;
@@ -429,7 +435,7 @@ function prepareClaimDelayedStakeTransactions(
     method: getMethodByName(xAlgoABIContract.methods, "claim_delayed_mint"),
     methodArgs: [minterAddr, nonce],
     boxes: [{ appIndex: consensusAppId, name: boxName }],
-    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 2 * MIN_FEE },
   });
 
   // allocate resources
@@ -470,11 +476,11 @@ function prepareUnstakeTransactions(
     txn: transferAlgoOrAsset(xAlgoId, senderAddr, getApplicationAddress(consensusAppId).toString(), amount, {
       ...params,
       flatFee: true,
-      fee: 0,
+      fee: USER_TXN_FEE,
     }),
     signer,
   };
-  const fee = 1000 * (3 + consensusState.proposersBalances.length);
+  const fee = USER_TXN_FEE + MIN_FEE * (1 + consensusState.proposersBalances.length);
 
   const atc = new AtomicTransactionComposer();
   atc.addMethodCall({
@@ -515,7 +521,7 @@ function prepareClaimConsensusFeesTransactions(
 ): Transaction[] {
   const { consensusAppId } = consensusConfig;
 
-  const fee = 1000 * (2 + consensusState.proposersBalances.length);
+  const fee = USER_TXN_FEE + MIN_FEE * (1 + consensusState.proposersBalances.length);
 
   const atc = new AtomicTransactionComposer();
   atc.addMethodCall({
@@ -573,7 +579,7 @@ function prepareSetProposerAdminTransaction(
         name: Uint8Array.from([...enc.encode("ap"), ...decodeAddress(proposerAddr).publicKey]),
       },
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 1000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -617,7 +623,11 @@ function prepareRegisterProposerOnlineTransactions(
   const proposerIndex = getProposerIndex(consensusState, proposerAddr);
 
   const sendAlgo = {
-    txn: transferAlgoOrAsset(0, senderAddr, proposerAddr, PAYOUTS_GO_ONLINE_FEE, { ...params, flatFee: true, fee: 0 }),
+    txn: transferAlgoOrAsset(0, senderAddr, proposerAddr, PAYOUTS_GO_ONLINE_FEE, {
+      ...params,
+      flatFee: true,
+      fee: USER_TXN_FEE,
+    }),
     signer,
   };
 
@@ -645,7 +655,7 @@ function prepareRegisterProposerOnlineTransactions(
         name: Uint8Array.from([...enc.encode("ap"), ...decodeAddress(proposerAddr).publicKey]),
       },
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 3000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   return atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
@@ -690,7 +700,7 @@ function prepareRegisterProposerOfflineTransaction(
         name: Uint8Array.from([...enc.encode("ap"), ...decodeAddress(proposerAddr).publicKey]),
       },
     ],
-    suggestedParams: { ...params, flatFee: true, fee: 2000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
