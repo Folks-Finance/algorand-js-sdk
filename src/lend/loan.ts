@@ -1105,18 +1105,23 @@ function prepareRemoveUserLoan(
     appID: loanAppId,
     method: getMethodByName(loanABIContract.methods, "remove_loan"),
     methodArgs: [escrowAddr],
-    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 3 * MIN_FEE },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
     return txn;
   });
+  // escrow is rekeyed back to the user so its txns are signed by the user
   const optOutTx = makeApplicationCloseOutTxnFromObject({
     sender: escrowAddr,
     appIndex: loanAppId,
-    suggestedParams: { ...params, flatFee: true, fee: 0 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE },
   });
-  const closeToTx = removeEscrowNoteTransaction(escrowAddr, userAddr, "lr ", { ...params, flatFee: true, fee: 0 });
+  const closeToTx = removeEscrowNoteTransaction(escrowAddr, userAddr, "lr ", {
+    ...params,
+    flatFee: true,
+    fee: USER_TXN_FEE,
+  });
   return [txns[0], optOutTx, closeToTx];
 }
 

@@ -563,16 +563,17 @@ function prepareRemoveLiquidGovernanceEscrowTransactions(
     method: getMethodByName(abiDistributor.methods, "remove_escrow"),
     methodArgs: [escrowAddr],
     appAccounts: [ownerAddr],
-    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 4 * MIN_FEE },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE + 3 * MIN_FEE },
   });
   const txns = atc.buildGroup().map(({ txn }) => {
     txn.group = undefined;
     return txn;
   });
+  // escrow is rekeyed to the sender so its txn is signed by the sender
   const optOutTx = makeApplicationCloseOutTxnFromObject({
     sender: escrowAddr,
     appIndex: distributor.appId,
-    suggestedParams: { ...params, flatFee: true, fee: 0 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE },
     rekeyTo: escrowAddr,
   });
   return [txns[0], optOutTx];
