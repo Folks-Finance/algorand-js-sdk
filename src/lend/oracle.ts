@@ -7,6 +7,7 @@ import {
   getApplicationGlobalState,
   getParsedValueFromState,
   signer,
+  USER_TXN_FEE,
 } from "../utils";
 
 import { oracleAdapterABIContract } from "./abi-contracts";
@@ -199,7 +200,7 @@ function prepareRefreshPricesInOracleAdapter(
     appID: oracleAdapterAppId,
     method: getMethodByName(oracleAdapterABIContract.methods, "refresh_prices"),
     methodArgs: [lpAssetIds, baseAssetIds, oracle0AppId, oracle1AppId, lpTokenOracleAppId],
-    suggestedParams: { ...params, flatFee: true, fee: 1000 },
+    suggestedParams: { ...params, flatFee: true, fee: USER_TXN_FEE },
   });
 
   // build

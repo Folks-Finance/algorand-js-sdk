@@ -52,6 +52,10 @@ function unixTime(): number {
 
 const PAYOUTS_GO_ONLINE_FEE = BigInt(2e6);
 
+const MIN_FEE = 1000; // per txn, including inner txns
+const PQ_FEE_PREMIUM = 2000; // extra for falcon-signed txns
+const USER_TXN_FEE = MIN_FEE + PQ_FEE_PREMIUM; // fee for each txn sent by the user
+
 /**
  * Wraps a call to Algorand client (algod/indexer) and returns global state
  */
@@ -255,6 +259,8 @@ export {
   transferAlgoOrAsset,
   signer,
   PAYOUTS_GO_ONLINE_FEE,
+  MIN_FEE,
+  USER_TXN_FEE,
   unixTime,
   getApplicationGlobalState,
   getAccountApplicationLocalState,
