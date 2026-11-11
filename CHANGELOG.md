@@ -1,5 +1,19 @@
 # @folks-finance/algorand-sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- [#113](https://github.com/Folks-Finance/algorand-js-sdk/pull/113) [`e5eba1d`](https://github.com/Folks-Finance/algorand-js-sdk/commit/e5eba1dd5a80065eee67dbb425740ab8551092b7) Thanks [@gidonkatten](https://github.com/gidonkatten)! - add support for quantum accounts
+
+### Patch Changes
+
+- [#113](https://github.com/Folks-Finance/algorand-js-sdk/pull/113) [`e5eba1d`](https://github.com/Folks-Finance/algorand-js-sdk/commit/e5eba1dd5a80065eee67dbb425740ab8551092b7) Thanks [@gidonkatten](https://github.com/gidonkatten)! - bump dependencies
+
+- [#114](https://github.com/Folks-Finance/algorand-js-sdk/pull/114) [`c3276da`](https://github.com/Folks-Finance/algorand-js-sdk/commit/c3276daffe163976ac6b18c7d6d3f59964f77c23) Thanks [@gidonkatten](https://github.com/gidonkatten)! - Corrected NTT lending pools lpAssetId
+
+- [#115](https://github.com/Folks-Finance/algorand-js-sdk/pull/115) [`8db9f6e`](https://github.com/Folks-Finance/algorand-js-sdk/commit/8db9f6e084d41cb66574084642f8fb3358a8c8e5) Thanks [@gidonkatten](https://github.com/gidonkatten)! - Use public `algosdk` `modelsv2` types instead of deep dist imports; handle missing app params in global state lookup
+
 ## 0.2.6
 
 ### Patch Changes
